@@ -1,8 +1,23 @@
-# Supabase        → runs PostgreSQL database
-# SQLAlchemy      → connects to DB and executes queries via sessions
-# FastAPI routes  → use sessions (SQLAlchemy) to handle requests (Client or Frontend)
+# ======================================================
+# EXTERNAL IMPORTS
+# ======================================================
 
 from fastapi import FastAPI
 
+# ======================================================
+# INTERNAL IMPORTS
+# ======================================================
+
+from backend.routes.auth import auth_route
+
+# ======================================================
+# APP
+# ======================================================
 
 app = FastAPI()
+
+# ======================================================
+# ROUTE REGISTRATION
+# ======================================================
+
+app.include_router(auth_route)
