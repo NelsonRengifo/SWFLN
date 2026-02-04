@@ -1,6 +1,6 @@
 import logging
-import os
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 
 def setup_logging():
@@ -14,8 +14,8 @@ def setup_logging():
 
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LOG_FILE = os.path.abspath(os.path.join(BASE_DIR, "..", "logs", "logs.log"))
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    LOG_FILE = BASE_DIR / "logs" / "logs.log"
 
     file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
