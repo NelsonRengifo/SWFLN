@@ -17,6 +17,9 @@ def setup_logging():
     BASE_DIR = Path(__file__).resolve().parent.parent
     LOG_FILE = BASE_DIR / "logs" / "logs.log"
 
+    # Creates the log folder if it does not exist
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
     file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
