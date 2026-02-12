@@ -20,12 +20,12 @@ load_dotenv(env_path, override=True)
 # ======================================================
 
 
-from backend.queries import generate_schema
+from backend import queries
 
 
 
-def create_tables():
-    generate_schema()
+def create_tables() -> None:
+    queries.generate_schema()
 
 
 if __name__ == "__main__":
