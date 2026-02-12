@@ -47,3 +47,30 @@ class FailedToHash(Exception):
 
 class InvalidUserRole(Exception):
     pass
+
+
+# ======================================================
+# PASSWORD EXCEPTIONS
+# ======================================================
+
+
+class PasswordsMatch(Exception):
+    pass
+
+
+# ======================================================
+# SENDGRID EXCEPTIONS
+# ======================================================
+
+
+class FailedToSend(Exception):
+    pass
+
+
+# ======================================================
+# EMAIL EXCEPTIONS
+# ======================================================
+
+
+class EmailNotFound(Exception):
+    pass
