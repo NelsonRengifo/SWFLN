@@ -2,6 +2,7 @@
 # EXTERNAL IMPORTS
 # ======================================================
 
+
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -15,6 +16,7 @@ backend = Path(__file__).resolve().parent.parent
 env_path = backend / ".env"
 load_dotenv(env_path, override=True)
 
+
 # ======================================================
 # INTERNAL IMPORTS
 # ======================================================
@@ -23,10 +25,10 @@ load_dotenv(env_path, override=True)
 from backend import queries
 
 
-
-def create_tables() -> None:
-    queries.generate_schema()
+def run_delete_expired_tokens() -> None:
+    queries.delete_expired_tokens()
 
 
 if __name__ == "__main__":
-    create_tables()
+    run_delete_expired_tokens()
+    

@@ -8,6 +8,7 @@ from sqlalchemy import text, bindparam
 from sqlalchemy.engine import Row
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT
+import logging
 
 
 # ======================================================
@@ -22,7 +23,7 @@ from backend.core.database_config import SessionLocal
 # CREATES ABS PATH TO SQL FOLDER & LOADS .sql FILES
 # ======================================================
 
-
+logger = logging.getLogger(__name__)
 backend_path = Path(__file__).resolve().parent
 sql_path = backend_path / "sql"
 
@@ -87,13 +88,36 @@ def create_super_admin(param) -> None:
 
 
 # ======================================================
+# DELETES EXPIRED SESSIONS FROM DB EVERY HOUR
+# ======================================================
+
+
+def delete_expired_tokens() -> None:
+
+    db = SessionLocal()
+
+    try:
+        sql1 = load_sql("delete_expired_reset_tokens", "auth")
+        sql2 = load_sql("delete_expired_sessions", "auth")
+        db.execute(text(sql1))
+        db.execute(text(sql2))
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.exception(f"Failed to run job. ERROR: {e}")
+        raise
+    finally:
+        db.close()
+
+
+# ======================================================
 # AUTH FUNCTIONS
 # ======================================================
 
 
-def get_user_for_auth(db, username) -> Row | None:
+def get_user_for_auth_by_username(db, username) -> Row | None:
 
-    sql = load_sql("get_user_for_auth", "auth")
+    sql = load_sql("get_user_for_auth_by_username", "auth")
     return db.execute(text(sql), {"username": username}).one_or_none()
 
 
@@ -139,15 +163,15 @@ def create_session_token(db, user_id, token_hash) -> UUID:
     return db.execute(text(sql), params).scalar_one()
 
 
-def get_session_token(db, token_hash) -> Row | None:
+def get_session_info_by_token_hash(db, token_hash) -> Row | None:
 
-    sql = load_sql("get_session_token", "auth")
+    sql = load_sql("get_session_info_by_token_hash", "auth")
     return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
 
 
-def delete_session_token(db, token_hash) -> Row | None:
+def delete_session_token_by_token_hash(db, token_hash) -> Row | None:
 
-    sql = load_sql("delete_session_token", "auth")
+    sql = load_sql("delete_session_token_by_token_hash", "auth")
     return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
 
 
@@ -155,3 +179,54 @@ def extend_session_expiry(db, token_hash) -> None:
 
     sql = load_sql("extend_session_expiry", "auth")
     db.execute(text(sql), {"token_hash": token_hash})
+
+
+def get_user_password_by_user_id(db, user_id) -> Row | None:
+
+    sql = load_sql("get_user_password_by_user_id", "auth")
+    return db.execute(text(sql), {"user_id": user_id}).scalar_one()
+
+
+def update_user_password_by_user_id(db, password_hash, user_id) -> UUID:
+
+    sql = load_sql("update_user_password_by_user_id", "auth")
+    params = {"password_hash": password_hash, "user_id": user_id}
+    return db.execute(text(sql), params).scalar_one()
+
+
+def delete_sessions_by_user_id(db, user_id) -> None:
+
+    sql = load_sql("delete_sessions_by_user_id", "auth")
+    db.execute(text(sql), {"user_id": user_id})
+
+
+def update_user_username_by_user_id(db, new_username, user_id) -> UUID:
+
+    sql = load_sql("update_user_username_by_user_id", "auth")
+    params = {"username": new_username, "user_id": user_id}
+    db.execute(text(sql), params).scalar_one()
+
+
+def get_user_id_for_transaction_by_email(db, email) -> UUID | None:
+
+    sql = load_sql("get_user_id_for_transaction_by_email", "auth")
+    return db.execute(text(sql), {"email": email}).scalar_one_or_none()
+
+
+def create_password_reset_token(db, user_id, token_hash) -> UUID:
+
+    sql = load_sql("create_password_reset_token", "auth")
+    params = {"user_id": user_id, "token_hash": token_hash}
+    return db.execute(text(sql), params).scalar_one()
+
+
+def get_reset_session_info_by_token_hash(db, token_hash) -> Row | None:
+
+    sql = load_sql("get_reset_session_info_by_token_hash", "auth")
+    return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
+
+
+def get_user_username_by_email(db, email) -> str | None:
+
+    sql = load_sql("get_user_username_by_email", "auth")
+    return db.execute(text(sql), {"email": email}).scalar_one_or_none()
