@@ -88,7 +88,7 @@ class ResetPassword(BaseModel):
     confirm_password: str = Field(min_length=8, max_length=128)
 
     @model_validator(mode='after')
-    # self is an instance of UpdatePassword
+    # self is an instance of ResetPassword
     def check_passwords_match(self) -> Self:
         if self.new_password != self.confirm_password:
             # HTTP 422
