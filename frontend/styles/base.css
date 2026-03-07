@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f4f7;
+  padding: 1rem;
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.toast {
+  background: #1f2937;
+  color: white;
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}

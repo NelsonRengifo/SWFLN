@@ -1,0 +1,40 @@
+.dashboard {
+  padding: 2rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.card:hover {
+  background: #f5f7fa;
+}
+
+.report-section {
+  margin-top: 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+}

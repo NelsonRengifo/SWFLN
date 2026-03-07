@@ -1,0 +1,47 @@
+<!--Dashboard Page-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SWFLN Dashboard</title>
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/dashboard.css" />
+
+  <script type="module" src="/frontend/src/pages/dashboard.js" defer></script>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>SWFLN Reporting Dashboard</h1>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</header>
+
+<main class="dashboard">
+
+  <section class="cards">
+    <button class="card" data-report="events">
+      <h2>Event Attendance</h2>
+      <p>LibCal Event Statistics</p>
+    </button>
+
+    <button class="card" data-report="training">
+      <h2>Training Reports</h2>
+      <p>Niche Academy Participation</p>
+    </button>
+
+    <button class="card" data-report="checkouts">
+      <h2>Equipment Usage</h2>
+      <p>myTurn Checkout Data</p>
+    </button>
+  </section>
+
+  <section id="reportSection" class="report-section hidden">
+    <h2 id="reportTitle"></h2>
+    <div id="reportContent"></div>
+  </section>
+
+</main>
+
+</body>
+</html>
