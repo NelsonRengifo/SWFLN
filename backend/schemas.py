@@ -1,3 +1,5 @@
+#                                           Pydantic Models
+
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
@@ -88,7 +90,7 @@ class ResetPassword(BaseModel):
     confirm_password: str = Field(min_length=8, max_length=128)
 
     @model_validator(mode='after')
-    # self is an instance of UpdatePassword
+    # self is an instance of ResetPassword
     def check_passwords_match(self) -> Self:
         if self.new_password != self.confirm_password:
             # HTTP 422
@@ -103,3 +105,13 @@ class ResetPassword(BaseModel):
 
 class ForgotUsername(BaseModel):
     email: EmailStr
+
+
+# ======================================================
+# TOP TUTORIALS DTO RESPONSE MODEL
+# ======================================================
+
+
+class TopTutorials(BaseModel):
+    tutorial_name: str
+    total_views: int

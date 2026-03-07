@@ -1,17 +1,9 @@
-"""
-PRODUCTION FEATURES PENDING:
-
-1. Login rate limiting to protect againts brute force attacks and forgot-password spam.
-2. email verification on signup to ensure user actually owns that email.
-"""
-
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
 
 
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,6 +19,7 @@ from backend.core.database_config import get_db
 from backend import schemas
 from backend.exceptions import auth
 from backend import email_service
+from backend.routes.dependencies.auth_dependencies import session_token
 
 
 # ======================================================
@@ -35,18 +28,6 @@ from backend import email_service
 
 
 auth_route = APIRouter(prefix='/auth')
-
-
-# ======================================================
-# CREDENTIALS DEPENDENCY
-# ======================================================
-
-
-bearer_object = HTTPBearer()
-
-
-def session_token(credentials=Depends(bearer_object)):
-    return credentials.credentials
 
 
 # ======================================================
