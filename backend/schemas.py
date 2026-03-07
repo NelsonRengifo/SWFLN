@@ -1,3 +1,5 @@
+#                                           Pydantic Models
+
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
@@ -103,3 +105,13 @@ class ResetPassword(BaseModel):
 
 class ForgotUsername(BaseModel):
     email: EmailStr
+
+
+# ======================================================
+# TOP TUTORIALS DTO RESPONSE MODEL
+# ======================================================
+
+
+class TopTutorials(BaseModel):
+    tutorial_name: str
+    total_views: int
