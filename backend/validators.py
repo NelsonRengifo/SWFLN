@@ -1,3 +1,8 @@
+# ======================================================
+# EXTERNAL IMPORTS
+# ======================================================
+
+
 from argon2 import PasswordHasher
 from password_strength import PasswordPolicy
 
@@ -39,7 +44,10 @@ def verify_password(plain_password, stored_password) -> None:
 def validate_password(plain_password) -> bool:
 
     failures_list = policy.test(plain_password)
+    # If the list is empty -> True
+    # If the list is NOT empty (failed some policy) -> False
     return not failures_list
+
 
 # ======================================================
 # EMAIL SANITATION

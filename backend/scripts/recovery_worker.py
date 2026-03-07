@@ -1,3 +1,7 @@
+# PENDING if status = failed: debug, change to pending or keep as fail.
+# PENDING: REFACTOR db session logic to avoid opening closing twice
+
+
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
@@ -5,6 +9,9 @@
 
 from dotenv import load_dotenv
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # ======================================================
@@ -21,28 +28,45 @@ load_dotenv(env_path, override=True)
 # INTERNAL IMPORTS
 # ======================================================
 
-
-from backend.core.database_config import SessionLocal
 from backend import queries
+from backend.core.database_config import SessionLocal
 
 
-
-def create_tables() -> None:
+def run_ingestion_worker():
 
     db = SessionLocal()
 
     try:
-        queries.generate_schema(db)
+        queries.recover_ingestion_job(db)
         db.commit()
-        print("schema created")
     
     except Exception as e:
         db.rollback()
-        print(f"failed to generate schema. ERROR: {e}")
+        logger.exception(f"Failed to recover uploaded files. ERROR: {e}")
         raise
     
     finally:
         db.close()
 
+
+def run_transform_worker():
+
+    db = SessionLocal()
+
+    try:
+        queries.recover_transform_job(db)
+        db.commit()
+    
+    except Exception as e:
+        db.rollback()
+        logger.exception(f"Failed to run transform recovery. ERROR: {e}")
+        raise
+    
+    finally:
+        db.close()
+
+
+
 if __name__ == "__main__":
-    create_tables()
+    run_ingestion_worker()
+    run_transform_worker()

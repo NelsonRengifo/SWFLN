@@ -24,7 +24,8 @@ load_dotenv(env_path, override=True)
 # ======================================================
 
 
-from backend.routes.auth import auth_route
+from backend.routes.auth  import auth_route
+from backend.routes.admin import admin_route
 from backend.core.logging_config import setup_logging
 
 # ======================================================
@@ -54,3 +55,4 @@ app.add_middleware(
 
 
 app.include_router(auth_route)
+app.include_router(admin_route)

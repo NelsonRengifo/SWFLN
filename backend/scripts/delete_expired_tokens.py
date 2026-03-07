@@ -1,3 +1,5 @@
+# WORKER SCRIPT
+
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
@@ -5,7 +7,9 @@
 
 from dotenv import load_dotenv
 from pathlib import Path
+import logging
 
+logger = logging.getLogger(__name__)
 
 # ======================================================
 # LOAD .env
@@ -22,27 +26,27 @@ load_dotenv(env_path, override=True)
 # ======================================================
 
 
-from backend.core.database_config import SessionLocal
 from backend import queries
+from backend.core.database_config import SessionLocal
 
 
-
-def create_tables() -> None:
-
+def run_delete_expired_tokens() -> None:
+    
     db = SessionLocal()
-
+    
     try:
-        queries.generate_schema(db)
+        queries.delete_expired_tokens(db)
         db.commit()
-        print("schema created")
     
     except Exception as e:
         db.rollback()
-        print(f"failed to generate schema. ERROR: {e}")
+        logger.exception(f"Failed to delete expired tokens. ERROR: {e}")
         raise
-    
+
     finally:
         db.close()
 
+
 if __name__ == "__main__":
-    create_tables()
+    run_delete_expired_tokens()
+    

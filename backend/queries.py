@@ -1,3 +1,5 @@
+# REFACTOR: Check if using RETURNING incorrectly...
+
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
@@ -7,15 +9,19 @@ from pathlib import Path
 from sqlalchemy import text, bindparam
 from sqlalchemy.engine import Row
 from uuid import UUID
-from sqlalchemy.dialects.postgresql import ARRAY, TEXT
+from sqlalchemy.dialects.postgresql import ARRAY, TEXT, insert
+import logging
 
+logger = logging.getLogger(__name__)
 
 # ======================================================
 # INTERNAL IMPORTS
 # ======================================================
 
 
-from backend.core.database_config import SessionLocal
+from backend.models.raw_rows import RawRows
+from backend.models.tutorials import Tutorials
+from backend.models.tutorial_metrics import TutorialMetrics
 
 
 # ======================================================
@@ -27,7 +33,7 @@ backend_path = Path(__file__).resolve().parent
 sql_path = backend_path / "sql"
 
 
-def load_sql(filename, folder=None) -> None:
+def load_sql(filename, folder=None) -> str:
     """
     returns the content of a .sql file
 
@@ -48,42 +54,22 @@ def load_sql(filename, folder=None) -> None:
 # ======================================================
 
 
-def generate_schema() -> None:
+def generate_schema(db) -> None:
 
-    db = SessionLocal()
-
-    try:
         sql = load_sql("schema")
         db.execute(text(sql))
-        db.commit()
-        print("schema created")
-    except Exception:
-        db.rollback()
-        print("failed to generate schema")
-        raise
-    finally:
-        db.close()
+
 
 # ======================================================
 # CREATES THE SUPER ADMIN
 # ======================================================
 
 
-def create_super_admin(param) -> None:
+def create_super_admin(db, param) -> None:
 
-    db = SessionLocal()
-
-    try:
-        sql = load_sql("create_super_admin", "auth")
-        user_id = db.execute(text(sql), param).scalar_one()
-        db.commit()
-        print(f"super admin created: ID {user_id}")
-    except Exception:
-        db.rollback()
-        print(f"failed to generate super admin")
-        raise
-    finally:
-        db.close()
+    sql = load_sql("create_super_admin", "auth")
+    db.execute(text(sql), param)
+       
 
 
 # ======================================================
@@ -91,9 +77,9 @@ def create_super_admin(param) -> None:
 # ======================================================
 
 
-def get_user_for_auth(db, username) -> Row | None:
+def get_user_for_auth_by_username(db, username) -> Row | None:
 
-    sql = load_sql("get_user_for_auth", "auth")
+    sql = load_sql("get_user_for_auth_by_username", "auth")
     return db.execute(text(sql), {"username": username}).one_or_none()
 
 
@@ -139,15 +125,15 @@ def create_session_token(db, user_id, token_hash) -> UUID:
     return db.execute(text(sql), params).scalar_one()
 
 
-def get_session_token(db, token_hash) -> Row | None:
+def get_session_info_by_token_hash(db, token_hash) -> Row | None:
 
-    sql = load_sql("get_session_token", "auth")
+    sql = load_sql("get_session_info_by_token_hash", "auth")
     return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
 
 
-def delete_session_token(db, token_hash) -> Row | None:
+def delete_session_token_by_token_hash(db, token_hash) -> Row | None:
 
-    sql = load_sql("delete_session_token", "auth")
+    sql = load_sql("delete_session_token_by_token_hash", "auth")
     return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
 
 
@@ -155,3 +141,179 @@ def extend_session_expiry(db, token_hash) -> None:
 
     sql = load_sql("extend_session_expiry", "auth")
     db.execute(text(sql), {"token_hash": token_hash})
+
+
+def get_user_password_by_user_id(db, user_id) -> Row | None:
+
+    sql = load_sql("get_user_password_by_user_id", "auth")
+    return db.execute(text(sql), {"user_id": user_id}).scalar_one()
+
+
+def update_user_password_by_user_id(db, password_hash, user_id) -> UUID:
+
+    sql = load_sql("update_user_password_by_user_id", "auth")
+    params = {"password_hash": password_hash, "user_id": user_id}
+    return db.execute(text(sql), params).scalar_one()
+
+
+def delete_sessions_by_user_id(db, user_id) -> None:
+
+    sql = load_sql("delete_sessions_by_user_id", "auth")
+    db.execute(text(sql), {"user_id": user_id})
+
+
+def update_user_username_by_user_id(db, new_username, user_id) -> UUID:
+
+    sql = load_sql("update_user_username_by_user_id", "auth")
+    params = {"username": new_username, "user_id": user_id}
+    db.execute(text(sql), params).scalar_one()
+
+
+def get_user_id_for_transaction_by_email(db, email) -> UUID | None:
+
+    sql = load_sql("get_user_id_for_transaction_by_email", "auth")
+    return db.execute(text(sql), {"email": email}).scalar_one_or_none()
+
+
+def create_password_reset_token(db, user_id, token_hash) -> UUID:
+
+    sql = load_sql("create_password_reset_token", "auth")
+    params = {"user_id": user_id, "token_hash": token_hash}
+    return db.execute(text(sql), params).scalar_one()
+
+
+def get_reset_session_info_by_token_hash(db, token_hash) -> Row | None:
+
+    sql = load_sql("get_reset_session_info_by_token_hash", "auth")
+    return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
+
+
+def get_user_username_by_email(db, email) -> str | None:
+
+    sql = load_sql("get_user_username_by_email", "auth")
+    return db.execute(text(sql), {"email": email}).scalar_one_or_none()
+
+
+# ======================================================
+# ADMIN FUNCTIONS
+# ======================================================
+
+
+def exists_file(db, checksum_sha256) -> bool:
+
+    sql = load_sql("exists_file", "admin")
+    return db.execute(text(sql), {"checksum_sha256": checksum_sha256}).scalar()
+
+
+def create_new_file(db, data) -> UUID:
+
+    sql = load_sql("create_new_file", "admin")
+    return db.execute(text(sql), data).scalar_one()
+
+
+def get_top_tutorials(db, limit, start_date, end_date) -> list[Row]:
+
+    params = {
+        "limit": limit,
+        "start_date": start_date,
+        "end_date": end_date
+    }
+    sql = load_sql("get_top_tutorials", "admin")
+    return db.execute(text(sql), params).all()
+
+
+
+# ======================================================
+# WORKER FUNCTIONS
+# ======================================================
+
+
+def delete_expired_tokens(db) -> None:
+
+  
+    sql1 = load_sql("delete_expired_reset_tokens", "jobs")
+    sql2 = load_sql("delete_expired_sessions", "jobs")
+    db.execute(text(sql1))
+    db.execute(text(sql2))
+
+
+def claim_ingestion_file(db) -> Row | None:
+
+    sql = load_sql("claim_ingestion_file", "jobs")
+    return db.execute(text(sql)).one_or_none()
+
+
+
+def update_ingestion_status(db, file_status, uploaded_file_id, error_message) -> None:
+
+    params = {
+        "ingestion_status": file_status,
+        "uploaded_file_id": uploaded_file_id,
+        "error_message": error_message
+    }
+    sql = load_sql("update_ingestion_status", "jobs")
+    db.execute(text(sql), params).scalar_one()
+
+
+def recover_ingestion_job(db) -> None:
+
+    sql = load_sql("recover_ingestion_job", "jobs")
+    db.execute(text(sql))
+
+
+def claim_transform_file(db) -> UUID | None:
+    
+    sql = load_sql("claim_transform_file", "jobs")
+    return db.execute(text(sql)).scalar_one_or_none()
+
+
+def update_transform_status(db, file_status, uploaded_file_id, error_message) -> None:
+    
+    params = {
+        "transform_status": file_status,
+        "uploaded_file_id": uploaded_file_id,
+        "transform_error_message": error_message
+    }
+    sql = load_sql("update_transform_status", "jobs")
+    db.execute(text(sql), params)
+
+
+def recover_transform_job(db) -> None:
+    
+    sql = load_sql("recover_transform_job", "jobs")
+    db.execute(text(sql))
+
+
+def insert_raw_row_data(db, data) -> int:
+
+    insert_obj = insert(RawRows).returning(1)
+    rows = db.execute(insert_obj, data).all()
+    return len(rows)
+
+
+def fetch_raw_rows(db, file_id) -> list[dict]:
+    
+    sql = load_sql("fetch_raw_rows", "jobs")
+    return db.execute(text(sql), {"uploaded_file_id": file_id}).scalars().all()
+
+
+def insert_tutorial_names(db, tutorial_names) -> None:
+    
+    insert_obj = insert(Tutorials).on_conflict_do_nothing(index_elements=["tutorial_name"])
+    db.execute(insert_obj, tutorial_names)
+
+
+def tutorial_mapping(db) -> dict:
+
+    sql = load_sql("tutorial_mapping", "jobs")
+    return db.execute(text(sql)).mappings()
+
+
+def insert_tutorial_data(db, tutorial_metrics) -> None:
+
+    insert_obj = insert(TutorialMetrics)
+    insert_obj = insert_obj.on_conflict_do_update(
+        index_elements=["tutorial_id", "metric_date"], 
+        set_={"total_views": insert_obj.excluded.total_views, "uploaded_file_id": insert_obj.excluded.uploaded_file_id}
+    )
+    db.execute(insert_obj, tutorial_metrics)

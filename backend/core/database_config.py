@@ -27,7 +27,7 @@ def get_db():
         yield db
         db.commit()
     except Exception as e:
-        logger.warning(f"database error: {e}")
+        logger.exception(f"database error: {e}")
         db.rollback()
         raise
     finally:
