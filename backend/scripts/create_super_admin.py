@@ -26,6 +26,7 @@ load_dotenv(env_path, override=True)
 
 
 from backend import validators, queries
+from backend.core.database_config import SessionLocal
 
 
 # ======================================================
@@ -94,8 +95,20 @@ def super_admin():
     norm_last_name = validators.normalize_last_name(last_name)
     param["last_name"] = norm_last_name
 
-    queries.create_super_admin(param)
+    db = SessionLocal()
 
+    try:
+        queries.create_super_admin(db, param)
+        db.commit()
+        print(f"super admin created")
+    
+    except Exception as e:
+        db.rollback()
+        print(f"failed to generate super admin")
+        raise
+    
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     super_admin()
