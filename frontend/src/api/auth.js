@@ -22,7 +22,7 @@ export async function login(username, password) {
 // --------------------
 // LOGOUT
 // --------------------
-import { showToast } from "./toast.js";
+import { showToast } from "../utils/toast.js";
 
 export async function logout() {
   try {

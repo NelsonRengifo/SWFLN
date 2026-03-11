@@ -1,38 +1,68 @@
 <!--Dashboard Page-->
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SWFLN Dashboard</title>
 
-  <link rel="stylesheet" href="/frontend/styles/base.css" />
-  <link rel="stylesheet" href="/frontend/styles/dashboard.css" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>SWFLN Dashboard</title>
 
-  <script type="module" src="/frontend/src/pages/dashboard.js" defer></script>
-</head>
-<body>
+```
+<link rel="stylesheet" href="/frontend/styles/base.css" />
+<link rel="stylesheet" href="/frontend/styles/dashboard.css" />
 
+<script type="module" src="/frontend/src/pages/dashboard.js" defer></script>
+```
+
+  </head>
+
+  <body>
+
+```
 <header class="app-header">
-  <h1>SWFLN Reporting Dashboard</h1>
-  <button id="logoutBtn" class="logout-btn">Logout</button>
+  <h1>SWFLN Admin Dashboard</h1>
+
+  <button id="logoutBtn" class="logout-btn">
+    Logout
+  </button>
 </header>
 
 <main class="dashboard">
 
+  <section class="dashboard">
+
+    <a class="card" href="reports.html">
+      <h3>Top Tutorials</h3>
+      <p>View most popular tutorials</p>
+    </a>
+
+    <a class="card" href="upload.html">
+      <h3>Upload CSV</h3>
+      <p>Upload new dataset</p>
+    </a>
+
+  </section>
+
   <section class="cards">
-    <button class="card" data-report="events">
-      <h2>Event Attendance</h2>
-      <p>LibCal Event Statistics</p>
+    <button id="loadTutorialsBtn" class="card">
+      <h2>Top Tutorials</h2>
+      <p>View most viewed tutorials</p>
     </button>
+  </section>
 
-    <button class="card" data-report="training">
-      <h2>Training Reports</h2>
-      <p>Niche Academy Participation</p>
-    </button>
+  <section class="upload-section">
+    <h2>Upload CSV File</h2>
 
-    <button class="card" data-report="checkouts">
-      <h2>Equipment Usage</h2>
-      <p>myTurn Checkout Data</p>
+    <input type="file" id="csvFile" accept=".csv" />
+
+    <select id="source">
+      <option value="libcal">LibCal</option>
+      <option value="niche">Niche</option>
+      <option value="myturn">MyTurn</option>
+    </select>
+
+    <button id="uploadBtn">
+      Upload File
     </button>
   </section>
 
@@ -42,6 +72,8 @@
   </section>
 
 </main>
+```
 
-</body>
+  </body>
+
 </html>
