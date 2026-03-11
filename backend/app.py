@@ -35,7 +35,7 @@ from backend.core.logging_config import setup_logging
 setup_logging()
 app = FastAPI()
 
-origins = list(os.getenv("CORS_ORIGINS"))
+origins = os.getenv("CORS_ORIGINS").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
