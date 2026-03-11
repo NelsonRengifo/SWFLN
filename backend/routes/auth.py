@@ -192,22 +192,3 @@ def reset_password(payload: schemas.ResetPassword, db=Depends(get_db)):
 
     except auth.FailedToHash:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Hashing error")
-
-
-# ======================================================
-# FORGOT USERNAME ROUTE (USE NOT AUTHENTICATED)
-# ======================================================
-
-
-@auth_route.post("/forgot-username", status_code=204)
-def get_user_username(payload: schemas.ForgotUsername, db=Depends(get_db)):
-
-    try:
-        username = services.get_username(db, payload.email)
-        email_service.send_username_email(payload.email, username)
-
-    except auth.FailedToSend:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send email")
-    
-    except auth.EmailNotFound:
-        pass
