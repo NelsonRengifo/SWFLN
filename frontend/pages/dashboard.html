@@ -1,24 +1,19 @@
 <!--Dashboard Page-->
 <!DOCTYPE html>
-
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8" />
-    <title>SWFLN Dashboard</title>
+<head>
+  <meta charset="UTF-8" />
+  <title>SWFLN Dashboard</title>
 
-```
-<link rel="stylesheet" href="/frontend/styles/base.css" />
-<link rel="stylesheet" href="/frontend/styles/dashboard.css" />
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/dashboard.css" />
 
-<script type="module" src="/frontend/src/pages/dashboard.js" defer></script>
-```
+  <script type="module" src="/frontend/src/pages/dashboard.js" defer></script>
+</head>
 
-  </head>
+<body>
 
-  <body>
-
-```
 <header class="app-header">
   <h1>SWFLN Admin Dashboard</h1>
 
@@ -27,53 +22,53 @@
   </button>
 </header>
 
-<main class="dashboard">
+<main>
 
-  <section class="dashboard">
+  <!-- Dashboard Cards -->
+  <section class="dashboard-grid">
 
     <a class="card" href="reports.html">
-      <h3>Top Tutorials</h3>
-      <p>View most popular tutorials</p>
+      <h2>Top Tutorials</h2>
+      <p>View Most Popular Tutorials</p>
     </a>
 
     <a class="card" href="upload.html">
-      <h3>Upload CSV</h3>
-      <p>Upload new dataset</p>
+      <h2>Upload Management</h2>
+      <p>Manage Uploads, View History, and Monitor Processing</p>
     </a>
 
   </section>
 
-  <section class="cards">
-    <button id="loadTutorialsBtn" class="card">
-      <h2>Top Tutorials</h2>
-      <p>View most viewed tutorials</p>
-    </button>
-  </section>
-
+  <!-- Upload Section -->
   <section class="upload-section">
-    <h2>Upload CSV File</h2>
 
-    <input type="file" id="csvFile" accept=".csv" />
+    <h2>Quick CSV Upload</h2>
 
-    <select id="source">
-      <option value="libcal">LibCal</option>
-      <option value="niche">Niche</option>
-      <option value="myturn">MyTurn</option>
-    </select>
+    <p class="upload-desc">Upload a dataset directly from the dashboard</p>
+    
+    <div class="upload-controls">
 
-    <button id="uploadBtn">
-      Upload File
-    </button>
+      <input type="file" id="csvFile" accept=".csv" />
+
+      <select id="source">
+        <option value="libcal">LibCal</option>
+        <option value="niche">Niche</option>
+        <option value="myturn">MyTurn</option>
+      </select>
+
+      <button id="uploadBtn">
+       Upload File
+      </button>
+    </div>
   </section>
 
+  <!-- Report Section -->
   <section id="reportSection" class="report-section hidden">
     <h2 id="reportTitle"></h2>
     <div id="reportContent"></div>
   </section>
 
 </main>
-```
 
-  </body>
-
+</body>
 </html>
