@@ -1,0 +1,42 @@
+<!--Reporting Page-->
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8" />
+    <title>SWFLN Reports</title>
+    <link rel = "stylesheet" href = "styles.css" />
+</head>
+
+<body>
+    <header>
+        <h1 id = "report-title">Report</h1>
+        <a href = "index.html">Back To Dashboard</a>
+    </header>
+
+    <section class = "filters">
+        <label>
+            Month:
+            <input type = "month" id = "monthFilter" />
+        </label>
+
+        <button id = "loadDataBtn">Load Report</button>
+        <button id = "exportBtn"> Export CSV</button>
+    </section>
+
+    <section class = "table-container">
+        <table id = "reportTable">
+            <thead>
+                <tr>
+                    <th data-sort = "name">Name</th>
+                    <th data-sort = "count">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!--DATA INJECT HERE-->
+            </tbody>
+        </table>
+    </section>
+
+    <script src = "app.js"></script>
+</body>
+</html>
