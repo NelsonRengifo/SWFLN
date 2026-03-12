@@ -31,37 +31,21 @@ function loadReport(){
         });
 }
 
-function renderTable(apiResponse){
-  const table = document.getElementById("reportTable");
-  const thead = table.querySelector("thead");
-  const tbody = table.querySelector("tbody");
+function renderTable(data){
+    const tbody = document.querySelector("#reportTable tbody");
+    tbody.innerHTML = "";
 
-  thead.innerHTML = "";
-  tbody.innerHTML = "";
-
-  // Header
-  const headerRow = document.createElement("tr");
-  apiResponse.columns.forEach(col => {
-    const th = document.createElement("th");
-    th.textContent = col.replace("_", " ").toUpperCase();
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-
-  // Rows
-  apiResponse.rows
-    .filter(row => Object.values(row).every(v => v !== 0))
-    .forEach(row => {
-      const tr = document.createElement("tr");
-      apiResponse.columns.forEach(col => {
-        const td = document.createElement("td");
-        td.textContent = row[col];
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
+    data
+        .filter(row => row.count !== 0)
+        .forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.name}</td>
+                <td>${row.count}</td>
+            `;
+            tbody.appendChild(tr);
+        });
 }
-
 
 function exportCSV(){
     const rows = [...document.querySelectorAll("table tr")];
