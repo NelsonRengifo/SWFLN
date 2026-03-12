@@ -1,23 +1,32 @@
-<!--Index-->
+<!--Dashboard-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SWFLN Reporting Dashboard</title>
-
-  <!--Base styles only-->
-  <link rel="stylesheet" href="styles/base.css" />
-
-  <!-- Immediate redirect -->
-  <meta http-equiv="refresh" content="0; url=/frontend/pages/login.html" />
+    <meta charset = "UTF-8" />
+    <title>SWFLN Reporting Dashboard</title>
+    <link rel = "stylesheet" href = "styles.css" />
 </head>
-
 <body>
-  <noscript>
-    <p>
-      <a href="/frontend/pages/login.html">Continue to Login</a>
-      <div id="toast-container" class="toast-container"></div>
-    </p>
-  </noscript>
+    <header>
+        <h1>SWFLN Reporting Dashboard</h1>
+        <p>Centralized reporting for member libraries</p>
+    </header>
+
+    <main class = "dashboard">
+        <a href = "report.html?type=events" class = "card">
+            <h2>Event Attendance</h2>
+            <p>LibCal Event Statistics</p>
+        </a>
+
+        <a href = "report.html?type=training" class = "card">
+            <h2>Training Reports</h2>
+            <p>Niche Academy Participation</p>
+        </a>
+
+        <a href = "report.html?type=checkouts" class = "card">
+            <h2>Equipment Usage</h2>
+            <p>myTurn Checkout Data</p>
+        </a>
+    </main>
 </body>
 </html>
