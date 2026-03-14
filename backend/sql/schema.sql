@@ -55,13 +55,16 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     transform_started_at TIMESTAMPTZ DEFAULT NULL,
     transform_completed_at TIMESTAMPTZ DEFAULT NULL,
 
-
+    FOREIGN KEY (uploaded_by) REFERENCES users(user_id),
     CHECK (ingestion_status IN ('pending', 'processing', 'completed', 'failed')),
     CHECK (source IN ('libcal', 'myturn', 'niche')),
     CHECK (transform_status IN ('pending', 'processing', 'completed', 'failed'))
 );
 
-CREATE INDEX  IF NOT EXISTS idx_uploaded_files_transform_pending
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_uploaded_at
+ON uploaded_files (uploaded_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_transform_pending
 ON uploaded_files (ingestion_status, transform_status);
 
 CREATE TABLE IF NOT EXISTS raw_rows (
@@ -97,5 +100,27 @@ CREATE TABLE IF NOT EXISTS tutorial_metrics (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (tutorial_id, metric_date),
     FOREIGN KEY (tutorial_id) REFERENCES tutorials(tutorial_id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
+);
+
+
+/*
+ * Libcal Canonical Tables
+ */
+
+
+CREATE TABLE IF NOT EXISTS events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    registrant_name TEXT NOT NULL,
+    event_title TEXT NOT NULL,
+    total_confirmed_registrants INTEGER NOT NULL,
+    total_number_registrants INTEGER NOT NULL,
+    uploaded_file_id UUID NOT NULL,
+    UNIQUE(registrant_name, start_date, end_date, event_title, start_time, end_time),
     FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
 );
