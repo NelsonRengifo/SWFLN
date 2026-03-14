@@ -7,7 +7,9 @@
 
 from pydantic import BaseModel, Field, EmailStr, model_validator
 from typing_extensions import Self
-
+from typing import Literal
+from uuid import UUID
+from datetime import date
 
 # ======================================================
 # LOGIN ROUTE CONTRACT
@@ -108,10 +110,41 @@ class ForgotUsername(BaseModel):
 
 
 # ======================================================
-# TOP TUTORIALS DTO RESPONSE MODEL
+# TOP TUTORIALS RESPONSE MODEL
 # ======================================================
 
 
 class TopTutorials(BaseModel):
     tutorial_name: str
     total_views: int
+
+
+# ======================================================
+# GET FILES RESPONSE MODEL
+# ======================================================
+
+
+# class FileRowData(BaseModel):
+#     uploaded_file_id: UUID
+#     uploaded_by: str
+#     uploaded_at: date
+#     original_file_name: str
+#     ingestion_status: Literal["pending", "processing", "completed", "failed"]
+#     transform_status: Literal["pending", "processing", "completed", "failed"]
+    
+    
+class FileListResponse(BaseModel):
+    data: list[dict]    
+    source: Literal["libcal", "niche", "myturn"]    
+    page:  int
+    limit: int
+    has_next: bool
+
+
+# ======================================================
+# DELETE FILE(s) ROUTE CONTRACT
+# ======================================================
+
+
+class DeleteFilesRequest(BaseModel):
+    files: list[UUID]
