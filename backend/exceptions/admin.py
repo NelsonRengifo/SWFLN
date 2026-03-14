@@ -2,6 +2,7 @@
 # UPLOADED FILE EXCEPTIONS
 # ======================================================
 
+
 class NoFileWasUploaded(Exception):
     pass
 
@@ -19,4 +20,12 @@ class StorageUploadFailError(Exception):
 
 
 class FailedToUploadMetaData(Exception):
+    pass
+
+
+class FileIsEmpty(Exception):
+    pass
+
+
+class FailedToDeleteTutorials(Exception):
     pass
