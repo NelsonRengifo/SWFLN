@@ -10,6 +10,7 @@ from sqlalchemy import text, bindparam
 from sqlalchemy.engine import Row
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, insert
+from sqlalchemy import delete
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 from backend.models.raw_rows import RawRows
 from backend.models.tutorials import Tutorials
 from backend.models.tutorial_metrics import TutorialMetrics
+from backend.models.events import Events
+from backend.models.registrants import Registrants
+from backend.models.uploaded_files import UploadedFiles
 
 
 # ======================================================
@@ -56,8 +60,8 @@ def load_sql(filename, folder=None) -> str:
 
 def generate_schema(db) -> None:
 
-        sql = load_sql("schema")
-        db.execute(text(sql))
+    sql = load_sql("schema")
+    db.execute(text(sql))
 
 
 # ======================================================
@@ -222,6 +226,22 @@ def get_top_tutorials(db, limit, start_date, end_date) -> list[Row]:
     return db.execute(text(sql), params).all()
 
 
+def delete_uploaded_files(db, file_ids: list[UUID]) -> list[str]:
+    # returns a list of storage paths
+
+    delete_obj = delete(UploadedFiles).where(UploadedFiles.uploaded_file_id.in_(file_ids)).returning(UploadedFiles.storage_path)
+    return db.execute(delete_obj).scalars().all()
+
+
+def get_file_data(db, offset_value, source) -> list[Row]:
+
+    params = {
+        "OFFSET": offset_value,
+        "source": source
+    }
+    sql = load_sql("get_file_data", "admin")
+    return db.execute(text(sql), params).all()
+
 
 # ======================================================
 # WORKER FUNCTIONS
@@ -237,10 +257,10 @@ def delete_expired_tokens(db) -> None:
     db.execute(text(sql2))
 
 
-def claim_ingestion_file(db) -> Row | None:
+def claim_ingestion_file(db, source) -> Row | None:
 
     sql = load_sql("claim_ingestion_file", "jobs")
-    return db.execute(text(sql)).one_or_none()
+    return db.execute(text(sql), {"source": source}).one_or_none()
 
 
 
@@ -261,10 +281,10 @@ def recover_ingestion_job(db) -> None:
     db.execute(text(sql))
 
 
-def claim_transform_file(db) -> UUID | None:
+def claim_transform_file(db, source) -> UUID | None:
     
     sql = load_sql("claim_transform_file", "jobs")
-    return db.execute(text(sql)).scalar_one_or_none()
+    return db.execute(text(sql), {"source": source}).scalar_one_or_none()
 
 
 def update_transform_status(db, file_status, uploaded_file_id, error_message) -> None:
@@ -312,8 +332,42 @@ def tutorial_mapping(db) -> dict:
 def insert_tutorial_data(db, tutorial_metrics) -> None:
 
     insert_obj = insert(TutorialMetrics)
+    # index_elements specifies the column(s) that define the conflict key
     insert_obj = insert_obj.on_conflict_do_update(
         index_elements=["tutorial_id", "metric_date"], 
         set_={"total_views": insert_obj.excluded.total_views, "uploaded_file_id": insert_obj.excluded.uploaded_file_id}
     )
     db.execute(insert_obj, tutorial_metrics)
+
+
+def delete_orphan_tutorials(db) -> None:
+
+    sql = load_sql("delete_orphan_tutorials", "jobs")
+    db.execute(text(sql))
+
+
+def insert_event_metadata(db, events_batch) -> None:
+
+    insert_obj = insert(Events)
+    insert_obj = insert_obj.on_conflict_do_update(
+        index_elements=["registrant_name", "start_date", "end_date", "event_title", "start_time", "end_time"],
+        set_= {
+            "total_confirmed_registrants": insert_obj.excluded.total_confirmed_registrants,
+            "uploaded_file_id": insert_obj.excluded.uploaded_file_id,
+            "total_number_registrants": insert_obj.excluded.total_number_registrants
+        }
+    )
+    db.execute(insert_obj, events_batch)
+
+
+# def insert_registrant_metadata(db, registrant_batch) -> None:
+
+#     insert_obj = insert(Registrants)
+#     insert_obj = insert_obj.on_conflict_do_nothing(index_elements=["id", "registrant_name"])
+#     db.execute(insert_obj, registrant_batch)
+
+# def event_mapping(db) -> dict:
+
+#     sql = load_sql("event_mapping", "jobs")
+#     return db.execute(text(sql)).mappings()
+    
