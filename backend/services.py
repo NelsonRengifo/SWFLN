@@ -8,7 +8,7 @@ import hashlib
 import logging
 import io
 import csv
-import time
+from datetime import time
 from typing import Literal
 from argon2 import exceptions, PasswordHasher
 from uuid import UUID
@@ -30,6 +30,7 @@ from backend.exceptions import admin
 from backend.clients.supabase import supabase
 from backend.dto.upload_dto import FilePathResult
 from backend.schemas import TopTutorials
+from backend.schemas import FileListResponse
 import backend.models
 
 
@@ -330,6 +331,8 @@ async def upload_file_service(db, file: UploadFile, source: str, user_id: UUID) 
         raise admin.InvalidFileFormat
     
     file_bytes = await _get_file_bytes(file)
+    if not file_bytes:
+        raise admin.FileIsEmpty
 
     checksum = _checksum(file_bytes)
 
@@ -367,8 +370,34 @@ async def upload_file_service(db, file: UploadFile, source: str, user_id: UUID) 
         raise admin.FailedToUploadMetaData
 
     return file_id 
-    
 
+
+# ======================================================
+# DELETE FILE LOGIC: STORAGE AND SHEMA
+# ======================================================
+
+
+def delete_files(db, files: list[UUID]) -> None:
+
+    storage_paths = queries.delete_uploaded_files(db, files)
+    _delete_tutorials(db)
+    for file_path in storage_paths:
+        _delete_file_from_storage(file_path)
+
+
+# ======================================================
+# DELETE ORPHAN TUTORIALS
+# ======================================================
+
+
+def _delete_tutorials(db) -> None:
+
+    try:
+        queries.delete_orphan_tutorials(db)
+        
+    except Exception as e:
+        logger.exception(f"Failed to delete tutorials | ERROR: {e}")
+        raise admin.FailedToDeleteTutorials
     
 # ======================================================
 # READ FILE BYTES
@@ -422,6 +451,10 @@ def _upload_file_to_storage(file_bytes, file_path) -> None:
     supabase.storage.from_("raw_uploads").upload(file=file_bytes, path=file_path, file_options={"content-type": "text/csv"})
     
 
+# ======================================================
+# DELETE FILE FROM SUPABASE
+# ======================================================
+
 
 def _delete_file_from_storage(file_path) -> None:
     
@@ -429,16 +462,52 @@ def _delete_file_from_storage(file_path) -> None:
 
 
 # ======================================================
-# PROCESS PENDING FILES
+# NICHE PENDING FILES
 # ======================================================
 
 
-def run_ingestion_logic(db) -> None:
+def run_niche_ingestion_logic(db, source) -> None:
         
     while True:
 
         try:
-            payload  = queries.claim_ingestion_file(db)
+            payload  = queries.claim_ingestion_file(db, source)
+            if payload is None:
+                break # There are no files waiting to be processed
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+            if not file_reader.fieldnames:
+                logger.warning(f"Missing CSV headers {storage_path}")
+                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                continue
+
+            _insert_raw_rows_batch(db, file_reader, file_id)
+            _set_ingestion_status(db, "completed", file_id)
+
+        # Special handling here to not trigger the get_db() logic in order to save file status.
+        except Exception as e:
+            db.rollback()
+            logger.exception(f"Failed to process niche uploaded files. ERROR: {e}")
+            _set_ingestion_status(db, "failed", file_id, str(e))
+            db.commit()
+
+
+# ======================================================
+# LIBCAL PENDING FILES
+# ======================================================
+
+
+def run_libcal_ingestion_logic(db, source) -> None:
+
+    while True:
+
+        try:
+            payload  = queries.claim_ingestion_file(db, source)
             if payload is None:
                 break # There are no files waiting to be processed
 
@@ -446,51 +515,34 @@ def run_ingestion_logic(db) -> None:
             file_id = payload.uploaded_file_id
             file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
 
-            file_text = file_bytes.decode()
-            file_stream = io.StringIO(file_text)
-            file_reader = csv.DictReader(file_stream)
+            file_reader = _load_csv_reader(file_bytes)
             if not file_reader.fieldnames:
                 logger.warning(f"Missing CSV headers {storage_path}")
                 _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
-
-            # Multi-value insert method
-            batch = []
-            BATCH_LIMIT = 5000
-            for row_number, row in enumerate(file_reader, start=1):
-                batch.append({
-                    "uploaded_file_id": file_id,
-                    "raw_data": row,
-                    "row_number": row_number
-                })
-                # 5000 rows of data
-                if len(batch) >= BATCH_LIMIT:
-                    inserted_ids = _insert_raw_row(db, batch)
-                    # check we actually inserted 5000 rows of data
-                    assert inserted_ids == len(batch)
-                    batch.clear()
-
-            if batch:
-                inserted_ids = _insert_raw_row(db, batch)
-                assert inserted_ids == len(batch)
             
+            _insert_raw_rows_batch(db, file_reader, file_id)
             _set_ingestion_status(db, "completed", file_id)
+            db.commit()
 
-        # Special handling here to not trigger the get_db() logic in order to save file status.
         except Exception as e:
             db.rollback()
-            logger.exception(f"Failed to process uploaded files. ERROR: {e}")
+            logger.exception(f"Failed to process libcal uploaded file. ERROR: {e}")
             _set_ingestion_status(db, "failed", file_id, str(e))
             db.commit()
 
 
+# ======================================================
+# NICHE TRANSFORMATION LOGIC
+# ======================================================
 
-def run_transform_logic(db) -> None:
+
+def run_niche_transform_logic(db, source) -> None:
     
     while True:
 
         try:
-            file_id = queries.claim_transform_file(db)
+            file_id = queries.claim_transform_file(db, source)
             if file_id is None:
                 break # There are no files waiting to be transformed
             
@@ -538,10 +590,114 @@ def run_transform_logic(db) -> None:
         # Special handling here to not trigger the get_db() logic in order to save file status.
         except Exception as e:
             db.rollback()
-            logger.exception(f"Failed to transform row. ERROR: {e}")
+            logger.exception(f"Failed to transform niche row. ERROR: {e}")
             _set_transform_status(db, "failed", file_id, str(e))
             db.commit()
 
+
+# ======================================================
+# LIBCAL TRANSFORMATION LOGIC
+# ======================================================
+
+
+def run_libcal_transform_logic(db, source):
+    
+    while True:
+
+        try:
+            file_id = queries.claim_transform_file(db, source)
+            if file_id is None:
+                break # There are no files waiting to be transformed
+            
+            # RAW rows
+            rows = _get_rows(db, file_id)
+
+            seen = set()
+            events_batch = []
+            registrants_batch = []
+
+            for row in rows:
+                first_name = row.get("First Name")
+                last_name = row.get("Last Name")
+                if not first_name or not last_name:
+                    continue
+                
+                attended = row.get("Attended")
+
+                # attended field was left empty
+                if not attended:
+                    continue
+
+                full_name = ""
+                if attended.lower() == 'yes':
+                        full_name += first_name.lower().strip() + " " + last_name.lower().strip()
+                else:
+                    # attended field == no
+                    continue
+
+                event_id = row.get("Event ID")
+                event_title = row.get("Title")
+                start_time = row.get("Start Time")
+                end_time = row.get("End Time")
+                start_date = row.get("Start Date")
+                end_date = row.get("End Date")
+
+                # Determines if duplicate row
+                
+                key = (event_id, first_name, last_name, event_title, start_time, end_time)
+
+                if key in seen:
+                    continue
+                
+                seen.add(key)
+
+                # normalize data
+                start_date = parser.parse(start_date).date()
+                end_date = parser.parse(end_date).date()
+                title = event_title.strip()
+                start_time = time.fromisoformat(start_time)
+                end_time = time.fromisoformat(end_time)
+                # total people who registered for the event
+                total_number_registrants = int(row.get("Confirmed Registrations"))
+                # total people who actually showed up
+                total_confirmed_registrants = int(row.get("Confirmed Attendance"))
+                
+                events_batch.append({
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "registrant_name": full_name,
+                    "event_title": title,
+                    "total_confirmed_registrants": total_confirmed_registrants,
+                    "total_number_registrants": total_number_registrants,
+                    "uploaded_file_id": file_id,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "event_id": event_id
+                })
+               
+            if events_batch:
+                _insert_events_data(db, events_batch)
+            
+            # result = _get_event_mapping(db)
+            # event_mapping = {row["registrant_name"]: row["id"] for row in result}
+
+            # for row in events_batch:
+
+            #     registrants_batch.append({
+            #         "id": event_mapping[row["registrant_name"]],
+            #         "registrant_name": row["registrant_name"]
+            #     })
+            
+            # if registrants_batch:
+            #     _insert_registrant_data(db, registrants_batch)
+
+            _set_transform_status(db, "completed", file_id)
+
+        except Exception as e:
+            db.rollback()
+            logger.exception(f"Failed to transform libcal row. ERROR: {e}")
+            _set_transform_status(db, "failed", file_id, str(e))
+            db.commit()
 
 
 # ======================================================
@@ -581,18 +737,7 @@ def _get_rows(db, file_id) -> list[dict]:
 
 
 # ======================================================
-# INSERTS THE TUTORIAL DATA
-# ======================================================
-
-
-def _insert_tutorial_metrics(db, tutorial_metrics) -> None:
-
-    queries.insert_tutorial_data(db, tutorial_metrics)
-
-
-
-# ======================================================
-# INSERTS TUTORIAL NAME
+# NICHE HELPER FUNCTIONS
 # ======================================================
 
 
@@ -601,9 +746,9 @@ def _insert_tutorials(db, tutorial_names) -> None:
     return queries.insert_tutorial_names(db, tutorial_names)
 
 
-# ======================================================
-# BUILDS MAP OF TUTORIAL NAME -> TUTORIAL ID 
-# ======================================================
+def _insert_tutorial_metrics(db, tutorial_metrics) -> None:
+
+    queries.insert_tutorial_data(db, tutorial_metrics)
 
 
 def _get_tutorial_mapping(db) -> dict:
@@ -611,14 +756,28 @@ def _get_tutorial_mapping(db) -> dict:
     return queries.tutorial_mapping(db)
 
 
-# ======================================================
-# BUILDS THE TOP TUTORIALS DTO RESPONSE
-# ======================================================
-
-
 def _build_top_tutorials_dto(rows: list[Row]) -> list[TopTutorials]:
 
     return list({"tutorial_name": row.tutorial_name, "total_views": row.total_views} for row in rows)
+
+
+# ======================================================
+# LIBCAL HELPER FUNCTIONS
+# ======================================================
+
+
+def _insert_events_data(db, batch) -> None:
+
+    queries.insert_event_metadata(db, batch)
+
+def _get_event_mapping(db) -> dict:
+
+    return queries.event_mapping(db)
+
+def _insert_registrant_data(db, batch) -> None:
+    
+    queries.insert_registrant_metadata(db, batch)
+
 
 
 # ======================================================
@@ -631,3 +790,84 @@ def top_tutorials(db, limit, start_date, end_date) -> list[TopTutorials]:
     rows = queries.get_top_tutorials(db, limit, start_date, end_date)
     return _build_top_tutorials_dto(rows)
     
+
+
+# ======================================================
+# PERFORMS BATCH INSERTION INTO RAW ROWS FOR NICHE
+# ======================================================
+
+
+def _insert_raw_rows_batch(db, file_reader: bytes, file_id: UUID) -> None:
+
+    # Multi-value insert method
+    batch = []
+    BATCH_LIMIT = 5000
+    for row_number, row in enumerate(file_reader, start=1):
+        batch.append({
+            "uploaded_file_id": file_id,
+            "raw_data": row,
+            "row_number": row_number
+        })
+        # 5000 rows of data
+        if len(batch) >= BATCH_LIMIT:
+            inserted_ids = _insert_raw_row(db, batch)
+            # check we actually inserted 5000 rows of data
+            assert inserted_ids == len(batch)
+            batch.clear()
+
+    if batch:
+        inserted_ids = _insert_raw_row(db, batch)
+        assert inserted_ids == len(batch)
+
+
+# ======================================================
+# PARSES AND PREPARES THE CSV FILE
+# ======================================================
+
+
+def _load_csv_reader(file_bytes: bytes) -> csv.DictReader:
+    # removes the BOM by using utf-8-sig
+    file_text = file_bytes.decode(encoding='utf-8-sig')
+    # creates an in-memory file-like object for strings so it can be used by DictReader
+    file_stream = io.StringIO(file_text)
+    # reads a CSV file and returns each row as a dictionary instead of a list so we can access by name
+    file_reader = csv.DictReader(file_stream)
+
+    return file_reader
+
+
+# ======================================================
+# GETS FILES TO DISPLAY FOR FRONTEND
+# ======================================================
+
+
+def file_data_dto(db, source, page) -> FileListResponse:
+
+    ROW_LIMIT = 25
+    offset_value = (page - 1) * ROW_LIMIT
+    rows = queries.get_file_data(db, offset_value, source)
+    has_next = False
+
+    data = []
+    counter = 0
+    for row in rows:
+        if counter > 25:
+            has_next = True
+            break
+        first_name = row.first_name.title()
+        last_name = row.last_name.title()
+        full_name = first_name + " " + last_name
+
+        row_dict = {
+            "uploaded_file_id": row.uploaded_file_id,
+            "uploaded_by": full_name,
+            "uploaded_at": row.uploaded_at.date(),
+            "original_file_name": row.original_file_name,
+            "ingestion_status": row.ingestion_status,
+            "transform_status": row.transform_status
+        }
+
+        data.append(row_dict)
+    
+    return FileListResponse(data=data, source=source ,page=page, limit=ROW_LIMIT, has_next=has_next)
+        
