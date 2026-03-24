@@ -1,8 +1,3 @@
-# ======================================================
-# UPLOADED FILE EXCEPTIONS
-# ======================================================
-
-
 class NoFileWasUploaded(Exception):
     pass
 
@@ -28,4 +23,11 @@ class FileIsEmpty(Exception):
 
 
 class FailedToDeleteTutorials(Exception):
+    pass
+
+
+class InvalidDateRange(Exception):
+    pass
+
+class InvalidFileType(Exception):
     pass
