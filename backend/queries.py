@@ -24,8 +24,9 @@ from backend.models.raw_rows import RawRows
 from backend.models.tutorials import Tutorials
 from backend.models.tutorial_metrics import TutorialMetrics
 from backend.models.events import Events
-from backend.models.registrants import Registrants
 from backend.models.uploaded_files import UploadedFiles
+from backend.models.loans import Loans
+from backend.models.items import Items
 
 
 # ======================================================
@@ -243,6 +244,38 @@ def get_file_data(db, offset_value, source) -> list[Row]:
     return db.execute(text(sql), params).all()
 
 
+def get_tutorial_views(db, start_date, end_date) -> list[dict]:
+
+    params = {
+        "start_date": start_date,
+        "end_date": end_date
+    }
+    sql = load_sql("get_tutorial_views", "admin")
+    return db.execute(text(sql), params).mappings()
+
+
+def get_event_count_by_type(db, start_date, end_date) -> list[dict]:
+
+    sql = load_sql("get_event_count_by_type", "admin")
+    params = {
+        "start_date": start_date,
+        "end_date": end_date
+    }
+    return db.execute(text(sql), params).mappings()
+
+
+def get_most_checkedout_items(db, limit) -> list[dict]:
+
+    sql = load_sql("get_most_checkedout_items", "admin")
+    return db.execute(text(sql), {"limit": limit}).mappings()
+
+
+def get_top_organizations(db, limit) -> list[dict]:
+
+    sql = load_sql("get_top_organizations", "admin")
+    return db.execute(text(sql), {"limit": limit}).mappings()
+
+
 # ======================================================
 # WORKER FUNCTIONS
 # ======================================================
@@ -272,7 +305,7 @@ def update_ingestion_status(db, file_status, uploaded_file_id, error_message) ->
         "error_message": error_message
     }
     sql = load_sql("update_ingestion_status", "jobs")
-    db.execute(text(sql), params).scalar_one()
+    db.execute(text(sql), params)
 
 
 def recover_ingestion_job(db) -> None:
@@ -281,10 +314,10 @@ def recover_ingestion_job(db) -> None:
     db.execute(text(sql))
 
 
-def claim_transform_file(db, source) -> UUID | None:
+def claim_transform_file(db, source) -> Row | None:
     
     sql = load_sql("claim_transform_file", "jobs")
-    return db.execute(text(sql), {"source": source}).scalar_one_or_none()
+    return db.execute(text(sql), {"source": source}).one_or_none()
 
 
 def update_transform_status(db, file_status, uploaded_file_id, error_message) -> None:
@@ -358,16 +391,17 @@ def insert_event_metadata(db, events_batch) -> None:
         }
     )
     db.execute(insert_obj, events_batch)
-
-
-# def insert_registrant_metadata(db, registrant_batch) -> None:
-
-#     insert_obj = insert(Registrants)
-#     insert_obj = insert_obj.on_conflict_do_nothing(index_elements=["id", "registrant_name"])
-#     db.execute(insert_obj, registrant_batch)
-
-# def event_mapping(db) -> dict:
-
-#     sql = load_sql("event_mapping", "jobs")
-#     return db.execute(text(sql)).mappings()
     
+
+def insert_loan_metadata(db, loans_batch) -> None:
+    
+    insert_obj = insert(Loans)
+    insert_obj = insert_obj.on_conflict_do_nothing(index_elements=["loan_id"])
+    db.execute(insert_obj, loans_batch)
+
+
+def insert_items_metadata(db, items_batch) -> None:
+
+    insert_obj = insert(Items)
+    insert_obj = insert_obj.on_conflict_do_update(index_elements=["item_id"], set_= {"cost": insert_obj.excluded.cost})
+    db.execute(insert_obj, items_batch)
