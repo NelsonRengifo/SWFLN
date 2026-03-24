@@ -24,9 +24,9 @@ def setup_logging():
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
 
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(formatter)
+    # stream_handler = logging.StreamHandler()
+    # stream_handler.setLevel(logging.DEBUG)
+    # stream_handler.setFormatter(formatter)
 
-    root.addHandler(stream_handler)
+    # root.addHandler(stream_handler)
     root.addHandler(file_handler)

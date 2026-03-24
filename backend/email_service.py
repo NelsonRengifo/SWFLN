@@ -3,12 +3,22 @@
 # ======================================================
 
 
-import os
 import logging
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from mailersend import MailerSendClient, EmailBuilder
+from pathlib import Path
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+
+# ======================================================
+# LOAD .env
+# ======================================================
+
+
+backend = Path(__file__).resolve().parent
+env_path = backend / ".env"
+load_dotenv(env_path, override=True)
 
 
 # ======================================================
@@ -20,56 +30,52 @@ from backend.exceptions import auth
 
 
 # ======================================================
-# SENDGRID BASIC CODE
+# MAILERSEND BASIC CODE
 # ======================================================
 
-PROTOCOL = "https://"
-DOMAIN = "127.0.0.1"            # This domain should be the front-end domain
-ROUTE = "/auth/reset-password"  # this route should be the front-end UI landing page
+
+PROTOCOL = "http://"                 # use https once live on service provider
+DOMAIN = "127.0.0.1:8000"            # This domain should be the front-end domain
+ROUTE = "/auth/reset-password"       # this route should be the front-end UI landing page
 
 
 def send_password_reset_link(recipient_email, token) -> None:
 
     reset_url = f"{PROTOCOL}{DOMAIN}{ROUTE}?token={token}"
 
-    message = Mail(
-        from_email='nrengifo2468@eagle.fgcu.edu',
-        to_emails=recipient_email,
-        subject='Reset Password Link',
-        html_content=f'Click here to reset password: <a href="{reset_url}">{reset_url}</a>')
+    ms = MailerSendClient()
 
+    email = (EmailBuilder()
+         .from_email("noreply@test-r9084zv6q6jgw63d.mlsender.net", "Nelson Rengifo")
+         .to_many([{"email": recipient_email}])
+         .subject("Reset Password Link")
+         .html(f'Click here to reset password: <a href="{reset_url}">{reset_url}</a>')
+         .build())
+    
     try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        sg.send(message)
+        response = ms.emails.send(email)
+        print(f"Email response: {response.status_code}")
 
-    except Exception:
+    except Exception as e:
+        logger.exception(f"ERROR: {e}")
         raise auth.FailedToSend
     
 
 def send_username_email(recipient_email, username) -> None:
 
-    message = Mail(
-        from_email='nrengifo2468@eagle.fgcu.edu',
-        to_emails=recipient_email,
-        subject='Username recovery',
-        html_content=f'<p>Your username is: <strong>{username}</strong></p>')
+    ms = MailerSendClient()
 
+    email = (EmailBuilder()
+         .from_email("nrengifo2468@eagle.fgcu.edu", "Nelson Rengifo")
+         .to_many([{"email": recipient_email}])
+         .subject("Username recovery")
+         .html(f'<p>Your username is: <strong>{username}</strong></p>')
+         .build())
+    
     try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        sg.send(message)
+        response = ms.emails.send(email)
+        print(f"Email response: {response.status_code}")
 
-    except Exception:
+    except Exception as e:
+        logger.exception(f"ERROR: {e}")
         raise auth.FailedToSend
-
-
-# Brevo (formerly Sendinblue) – free tier supports up to ~300 emails/day which is more than enough for occasional transactional sends.
-
-# Mailjet – free API tier with up to 6,000 emails/month.
-
-# Mailgun – has a free tier that allows 100 emails/day via API/SMTP.
-
-# SendPulse – free tier described with relatively generous monthly volume.
-
-# Postmark (Developer tier) – free 100 emails/month forever (good for very low volume).
-
-# SENDGRID TRIAL ENDS APRIL 8TH 2026
