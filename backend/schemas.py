@@ -122,15 +122,6 @@ class TopTutorials(BaseModel):
 # ======================================================
 # GET FILES RESPONSE MODEL
 # ======================================================
-
-
-# class FileRowData(BaseModel):
-#     uploaded_file_id: UUID
-#     uploaded_by: str
-#     uploaded_at: date
-#     original_file_name: str
-#     ingestion_status: Literal["pending", "processing", "completed", "failed"]
-#     transform_status: Literal["pending", "processing", "completed", "failed"]
     
     
 class FileListResponse(BaseModel):
@@ -142,9 +133,46 @@ class FileListResponse(BaseModel):
 
 
 # ======================================================
+# TUTORIAL VIEWS RESPONSE MODEL
+# ======================================================
+
+
+class TutorialViews(BaseModel):
+    data: list[dict]
+    total: int
+
+
+# ======================================================
 # DELETE FILE(s) ROUTE CONTRACT
 # ======================================================
 
 
 class DeleteFilesRequest(BaseModel):
     files: list[UUID]
+
+
+# ======================================================
+# TOTAL EVENTS BY TYPE 
+# ======================================================
+
+
+class TotalEvents(BaseModel):
+    data: list[dict]
+    total: int
+
+# ======================================================
+# TOP CHECKED OUT ITEMS
+# ======================================================
+
+
+class TopCheckedOutItems(BaseModel):
+    data: list[dict]
+
+
+# ======================================================
+# TOP ORGANIZATIONS
+# ======================================================
+
+
+class TopOrganizations(BaseModel):
+    data: list[dict]
