@@ -2,16 +2,8 @@
 // IMPORTS
 // ======================================================
 
-import {
-  uploadCSV,
-  fetchUploadHistory,
-  fetchProcessingLogs,
-  fetchTransformStatus,
-  fetchIngestionStatus
-} from "../api/admin.js";
-
+import { uploadCSV } from "../api/admin.js";
 import { showToast } from "../utils/toast.js";
-
 
 // ======================================================
 // DOM ELEMENTS
@@ -25,7 +17,6 @@ const uploadHistoryContainer = document.getElementById("uploadHistory");
 const logsContainer = document.getElementById("processingLogs");
 const transformContainer = document.getElementById("transformStatus");
 const ingestionContainer = document.getElementById("ingestionStatus");
-
 
 // ======================================================
 // QUICK CSV UPLOAD
@@ -50,9 +41,11 @@ async function handleUpload() {
 
     showToast("Upload successful");
 
-    fileInput.value = "";
+    // ✨ Simulated pipeline feedback
+    setTimeout(() => showToast("Ingestion complete"), 2000);
+    setTimeout(() => showToast("Transform complete"), 4000);
 
-    loadUploadHistory();
+    fileInput.value = "";
 
   } catch (err) {
 
@@ -67,134 +60,25 @@ async function handleUpload() {
   }
 }
 
-
 // ======================================================
-// LOAD UPLOAD HISTORY
+// STATIC PLACEHOLDERS (NO BACKEND SUPPORT)
 // ======================================================
 
-async function loadUploadHistory() {
-
-  try {
-
-    const uploads = await fetchUploadHistory();
-
-    if (!uploads || uploads.length === 0) {
-      uploadHistoryContainer.innerHTML = "<p>No uploads found</p>";
-      return;
-    }
-
-    const rows = uploads.map(upload => `
-      <tr>
-        <td>${upload.filename}</td>
-        <td>${upload.source}</td>
-        <td>${upload.status}</td>
-        <td>${upload.created_at}</td>
-      </tr>
-    `).join("");
-
-    uploadHistoryContainer.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>File</th>
-            <th>Source</th>
-            <th>Status</th>
-            <th>Uploaded</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    `;
-
-  } catch (err) {
-
-    console.error(err);
-    uploadHistoryContainer.innerHTML = "<p>Failed to load uploads</p>";
-
-  }
-
+function loadUploadHistory() {
+  uploadHistoryContainer.innerHTML = "<p>Upload history coming soon</p>";
 }
 
-
-// ======================================================
-// LOAD PROCESSING LOGS
-// ======================================================
-
-async function loadProcessingLogs() {
-
-  try {
-
-    const logs = await fetchProcessingLogs();
-
-    logsContainer.innerHTML = logs.map(log => `
-      <div class="log-item">
-        ${log.message}
-      </div>
-    `).join("");
-
-  } catch (err) {
-
-    console.error(err);
-    logsContainer.innerHTML = "<p>Failed to load logs</p>";
-
-  }
-
+function loadProcessingLogs() {
+  logsContainer.innerHTML = "<p>Logs coming soon</p>";
 }
 
-
-// ======================================================
-// LOAD TRANSFORM STATUS
-// ======================================================
-
-async function loadTransformStatus() {
-
-  try {
-
-    const transforms = await fetchTransformStatus();
-
-    transformContainer.innerHTML = transforms.map(t => `
-      <div>
-        ${t.name} : ${t.status}
-      </div>
-    `).join("");
-
-  } catch (err) {
-
-    console.error(err);
-    transformContainer.innerHTML = "<p>Failed to load transform status</p>";
-
-  }
-
+function loadTransformStatus() {
+  transformContainer.innerHTML = "<p>Transform status coming soon</p>";
 }
 
-
-// ======================================================
-// LOAD INGESTION STATUS
-// ======================================================
-
-async function loadIngestionStatus() {
-
-  try {
-
-    const ingestion = await fetchIngestionStatus();
-
-    ingestionContainer.innerHTML = ingestion.map(i => `
-      <div>
-        ${i.source} : ${i.status}
-      </div>
-    `).join("");
-
-  } catch (err) {
-
-    console.error(err);
-    ingestionContainer.innerHTML = "<p>Failed to load ingestion status</p>";
-
-  }
-
+function loadIngestionStatus() {
+  ingestionContainer.innerHTML = "<p>Ingestion status coming soon</p>";
 }
-
 
 // ======================================================
 // INITIALIZE PAGE

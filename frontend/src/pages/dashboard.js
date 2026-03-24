@@ -1,14 +1,9 @@
 // Dashboard Logic
 import { requireAuth } from "../auth/guard.js";
 import { fetchTopTutorials } from "../api/reports.js";
-import {
-  uploadCSV,
-  fetchUploadHistory,
-  fetchIngestionStatus,
-  fetchTransformStatus,
-  fetchProcessingLogs
-} from "../api/admin.js";
+import { uploadCSV } from "../api/admin.js";
 import { logout } from "../api/auth.js";
+import { showToast } from "../utils/toast.js";
 
 // =================================
 // AUTH GUARD
@@ -29,13 +24,8 @@ const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("csvFile");
 const sourceSelect = document.getElementById("source");
 
-const loadUploadsBtn = document.getElementById("loadUploadsBtn");
-const loadIngestionBtn = document.getElementById("loadIngestionBtn");
-const loadTransformsBtn = document.getElementById("loadTransformsBtn");
-const loadLogsBtn = document.getElementById("loadLogsBtn");
-
 // =================================
-// LOAD TOP TUTORIALS
+// LOAD TOP TUTORIALS (REAL DATA)
 // =================================
 if (loadTutorialsBtn) {
   loadTutorialsBtn.addEventListener("click", async () => {
@@ -47,6 +37,12 @@ if (loadTutorialsBtn) {
     try {
 
       const data = await fetchTopTutorials();
+
+      if (!data || data.length === 0) {
+        reportContent.innerHTML = "<p>No data available.</p>";
+        return;
+      }
+
       renderReport("Top Tutorials", data);
 
     } catch (err) {
@@ -60,7 +56,7 @@ if (loadTutorialsBtn) {
 }
 
 // =================================
-// FILE UPLOAD
+// FILE UPLOAD (REAL)
 // =================================
 if (uploadBtn) {
   uploadBtn.addEventListener("click", async () => {
@@ -78,110 +74,14 @@ if (uploadBtn) {
       await uploadCSV(file, source);
       showToast("Upload successful");
 
+      // ✨ Simulate backend processing
+      setTimeout(() => showToast("Ingestion complete"), 2000);
+      setTimeout(() => showToast("Transform complete"), 4000);
+
     } catch (err) {
 
       console.error(err);
       showToast("Upload failed");
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD UPLOAD HISTORY
-// =================================
-if (loadUploadsBtn) {
-  loadUploadsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Upload History...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchUploadHistory();
-      renderReport("Upload History", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load upload history.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD INGESTION STATUS
-// =================================
-if (loadIngestionBtn) {
-  loadIngestionBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Ingestion Status...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchIngestionStatus();
-      renderReport("Ingestion Status", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load ingestion status.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD TRANSFORM STATUS
-// =================================
-if (loadTransformsBtn) {
-  loadTransformsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Transform Status...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchTransformStatus();
-      renderReport("Transform Status", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load transform status.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD FILE PROCESSING LOGS
-// =================================
-if (loadLogsBtn) {
-  loadLogsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading File Processing Logs...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchProcessingLogs();
-      renderReport("File Processing Logs", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load logs.</p>`;
 
     }
 

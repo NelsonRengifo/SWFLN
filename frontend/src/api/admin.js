@@ -15,6 +15,7 @@ export async function uploadCSV(file, source) {
   });
 }
 
+/*
 // =================================
 // UPLOAD HISTORY
 // =================================
@@ -49,4 +50,4 @@ export async function fetchProcessingLogs() {
 
   return apiFetch("/admin/logs");
 
-}
+}*/

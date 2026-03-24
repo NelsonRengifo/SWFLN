@@ -47,3 +47,41 @@ export async function logout() {
   }
 
 }
+
+// --------------------
+// FORGOT PASSWORD
+// --------------------
+export async function forgotPassword(email) {
+  return apiFetch("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email })
+  });
+}
+
+// --------------------
+// RESET PASSWORD
+// --------------------
+export async function resetPassword(reset_token, new_password, confirm_password) {
+  return apiFetch("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({
+      reset_token,
+      new_password,
+      confirm_password
+    })
+  });
+}
+
+// --------------------
+// UPDATE PASSWORD (Logged In)
+// --------------------
+export async function updatePassword(current_password, new_password, confirm_password) {
+  return apiFetch("/auth/update/password", {
+    method: "POST",
+    body: JSON.stringify({
+      current_password,
+      new_password,
+      confirm_password
+    })
+  });
+}
