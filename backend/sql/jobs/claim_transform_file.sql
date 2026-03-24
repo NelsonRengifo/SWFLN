@@ -12,4 +12,4 @@ WHERE uploaded_file_id = (
     LIMIT 1
     FOR UPDATE SKIP LOCKED
     )
-RETURNING uploaded_file_id;
+RETURNING uploaded_file_id, storage_path;
