@@ -661,6 +661,17 @@ def run_niche_transform_logic(db, source) -> None:
 
             if file_type not in ["niche"]:
                 raise admin.InvalidFileType("file is not a valid niche file")
+            
+            normalized_year = None
+
+            for h in file_reader.fieldnames:
+
+                keyword = _classify_niche(h)
+
+                if keyword == 'date':
+                    month, two_digit_year = h.split()
+                    two_digit_year = int(two_digit_year)
+                    normalized_year = _normalize_year(two_digit_year) 
 
             # RAW rows
             rows = _get_rows(db, file_id)
@@ -746,7 +757,7 @@ def run_niche_transform_logic(db, source) -> None:
                         continue
 
                     else:
-                        metric_date = parser.parse(header).replace(day=1).date()
+                        metric_date = parser.parse(header).replace(day=1, year=normalized_year).date()
                         total_views = value
 
                 if (tutorial_id, metric_date) in seen:
@@ -1029,7 +1040,6 @@ def run_libcal_transform_logic(db, source):
             _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
-
 
 
 # ======================================================
@@ -1345,6 +1355,12 @@ def _classify_niche(header: str) -> Literal["tutorial", "total", "date"]:
     return "date"
 
 
+def _normalize_year(two_digit_year: int) -> int:
+    
+    CURRENT_CENTURY = 2000
+    return CURRENT_CENTURY + two_digit_year
+
+
 # ======================================================
 # LIBCAL HELPER FUNCTIONS
 # ======================================================
@@ -1589,12 +1605,16 @@ def event_count(db, start_date, end_date) -> TotalEvents:
     return _build_event_count_dto(rows)
 
 
+# ======================================================
+# GET MOST FREQUENTLY BOUGHT ITEMS
+# ======================================================
+
+
 def get_top_items(db, limit) -> TopCheckedOutItems:
 
     data = queries.get_most_checkedout_items(db, limit)
 
     return TopCheckedOutItems(data=data)
-
 
 
 # ======================================================
@@ -1606,6 +1626,7 @@ def fetch_top_organizations(db, limit) -> TopOrganizations:
     data = queries.get_top_organizations(db, limit)
 
     return TopOrganizations(data=data)
+
 
 # ======================================================
 # VALIDATE DATE RANGE
