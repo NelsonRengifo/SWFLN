@@ -8,7 +8,8 @@ import hashlib
 import logging
 import io
 import csv
-import time
+from datetime import time, date
+from datetime import datetime
 from typing import Literal
 from argon2 import exceptions, PasswordHasher
 from uuid import UUID
@@ -30,11 +31,17 @@ from backend.exceptions import admin
 from backend.clients.supabase import supabase
 from backend.dto.upload_dto import FilePathResult
 from backend.schemas import TopTutorials
+from backend.schemas import FileListResponse
+from backend.schemas import TutorialViews
+from backend.schemas import TotalEvents
+from backend.schemas import TopCheckedOutItems
+from backend.schemas import TopOrganizations
 import backend.models
 
 
 logger = logging.getLogger(__name__)
 hasher = PasswordHasher()
+
 
 
 #-------------------------------------------------------
@@ -330,6 +337,8 @@ async def upload_file_service(db, file: UploadFile, source: str, user_id: UUID) 
         raise admin.InvalidFileFormat
     
     file_bytes = await _get_file_bytes(file)
+    if not file_bytes:
+        raise admin.FileIsEmpty
 
     checksum = _checksum(file_bytes)
 
@@ -367,8 +376,34 @@ async def upload_file_service(db, file: UploadFile, source: str, user_id: UUID) 
         raise admin.FailedToUploadMetaData
 
     return file_id 
-    
 
+
+# ======================================================
+# DELETE FILE LOGIC: STORAGE AND SHEMA
+# ======================================================
+
+
+def delete_files(db, files: list[UUID]) -> None:
+
+    storage_paths = queries.delete_uploaded_files(db, files)
+    _delete_tutorials(db)
+    for file_path in storage_paths:
+        _delete_file_from_storage(file_path)
+
+
+# ======================================================
+# DELETE ORPHAN TUTORIALS
+# ======================================================
+
+
+def _delete_tutorials(db) -> None:
+
+    try:
+        queries.delete_orphan_tutorials(db)
+        
+    except Exception as e:
+        logger.exception(f"Failed to delete tutorials | ERROR: {e}")
+        raise admin.FailedToDeleteTutorials
     
 # ======================================================
 # READ FILE BYTES
@@ -422,6 +457,10 @@ def _upload_file_to_storage(file_bytes, file_path) -> None:
     supabase.storage.from_("raw_uploads").upload(file=file_bytes, path=file_path, file_options={"content-type": "text/csv"})
     
 
+# ======================================================
+# DELETE FILE FROM SUPABASE
+# ======================================================
+
 
 def _delete_file_from_storage(file_path) -> None:
     
@@ -429,78 +468,255 @@ def _delete_file_from_storage(file_path) -> None:
 
 
 # ======================================================
-# PROCESS PENDING FILES
+# CHECKS FILE HAS HEADERS
 # ======================================================
 
 
-def run_ingestion_logic(db) -> None:
+def _is_valid_file(file_reader) -> bool:
+
+    return False if not file_reader.fieldnames else True
+
+
+# ======================================================
+# CLASSIFY FILE TYPE
+# ======================================================
+
+
+def _classify_file(file_reader) -> Literal["niche", "libcal", "loans", "items"] | None:
+
+    # loans and items are both myturn files with different data.
+    NICHE = ["tutorial"]
+    LIBCAL = ["event id", "attended", "start time", "end time", "start date", "end date"]
+    LOANS = ["loan id", "checked out", "checked in", "renewal"]
+    ITEMS = ["historical cost", "item cost"]
+
+    headers = file_reader.fieldnames
+
+    for h in headers:
+
+        h = h.lower().strip()
+        
+        if h in NICHE:
+            return "niche"
+        
+        elif h in LIBCAL:
+            return "libcal"
+        
+        elif h in LOANS:
+            return "loans"
+        
+        elif h in ITEMS:
+            return "items"
+    
+    return None
+
+
+# ======================================================
+# NICHE PENDING FILES
+# ======================================================
+
+
+def run_niche_ingestion_logic(db, source) -> None:
         
     while True:
 
         try:
-            payload  = queries.claim_ingestion_file(db)
+            payload  = queries.claim_ingestion_file(db, source)
             if payload is None:
                 break # There are no files waiting to be processed
 
             storage_path = payload.storage_path
             file_id = payload.uploaded_file_id
+
             file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
 
-            file_text = file_bytes.decode()
-            file_stream = io.StringIO(file_text)
-            file_reader = csv.DictReader(file_stream)
-            if not file_reader.fieldnames:
+            file_reader = _load_csv_reader(file_bytes)
+
+            if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
                 _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
-            # Multi-value insert method
-            batch = []
-            BATCH_LIMIT = 5000
-            for row_number, row in enumerate(file_reader, start=1):
-                batch.append({
-                    "uploaded_file_id": file_id,
-                    "raw_data": row,
-                    "row_number": row_number
-                })
-                # 5000 rows of data
-                if len(batch) >= BATCH_LIMIT:
-                    inserted_ids = _insert_raw_row(db, batch)
-                    # check we actually inserted 5000 rows of data
-                    assert inserted_ids == len(batch)
-                    batch.clear()
+            file_type = _classify_file(file_reader)
 
-            if batch:
-                inserted_ids = _insert_raw_row(db, batch)
-                assert inserted_ids == len(batch)
+            if file_type not in ["niche"]:
+                raise admin.InvalidFileType("file is not a valid niche file")
             
+            _insert_raw_rows_batch(db, file_reader, file_id)
             _set_ingestion_status(db, "completed", file_id)
-
-        # Special handling here to not trigger the get_db() logic in order to save file status.
+            
         except Exception as e:
-            db.rollback()
-            logger.exception(f"Failed to process uploaded files. ERROR: {e}")
+            logger.exception(f"Failed to process niche uploaded files. ERROR: {e}")
             _set_ingestion_status(db, "failed", file_id, str(e))
-            db.commit()
+            _delete_file_from_storage(storage_path)
+            raise
 
 
+# ======================================================
+# LIBCAL PENDING FILES
+# ======================================================
 
-def run_transform_logic(db) -> None:
-    
+
+def run_libcal_ingestion_logic(db, source) -> None:
+
     while True:
 
         try:
-            file_id = queries.claim_transform_file(db)
-            if file_id is None:
-                break # There are no files waiting to be transformed
+            payload  = queries.claim_ingestion_file(db, source)
+            if payload is None:
+                break # There are no files waiting to be processed
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+
+            if not _is_valid_file(file_reader):
+                logger.warning(f"Missing CSV headers {storage_path}")
+                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                continue
+
+            file_type = _classify_file(file_reader)
+
+            if file_type not in ["libcal"]:
+                raise admin.InvalidFileType("file is not a valid libcal file")
             
+            _insert_raw_rows_batch(db, file_reader, file_id)
+            _set_ingestion_status(db, "completed", file_id)
+
+        except Exception as e:
+            logger.exception(f"Failed to process libcal uploaded file. ERROR: {e}")
+            _set_ingestion_status(db, "failed", file_id, str(e))
+            _delete_file_from_storage(storage_path)
+            raise
+
+
+# ======================================================
+# MYTURN PENDING FILES
+# ======================================================
+
+def run_myturn_ingestion_logic(db, source) -> None:
+
+    while True:
+
+        try:
+            payload  = queries.claim_ingestion_file(db, source)
+            if payload is None:
+                break # There are no files waiting to be processed
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+
+            if not _is_valid_file(file_reader):
+                logger.warning(f"Missing CSV headers {storage_path}")
+                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                continue
+
+            file_type = _classify_file(file_reader)
+
+            logger.debug(file_type)
+
+            if file_type not in ["loans", "items"]:
+                raise admin.InvalidFileType("file is not a valid myturn file")
+            
+            _insert_raw_rows_batch(db, file_reader, file_id)
+            _set_ingestion_status(db, "completed", file_id)
+
+        except Exception as e:
+            logger.exception(f"Failed to process myturn uploaded files. ERROR: {e}")
+            _set_ingestion_status(db, "failed", file_id, str(e))
+            _delete_file_from_storage(storage_path)
+            raise
+
+
+# ======================================================
+# NICHE TRANSFORMATION LOGIC
+# ======================================================
+
+
+def run_niche_transform_logic(db, source) -> None:
+
+    while True:
+
+        try:
+            payload = queries.claim_transform_file(db, source)
+
+            if payload is None:
+                break # There are no files waiting to be transformed
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+            
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+
+            file_type = _classify_file(file_reader)
+
+            if file_type not in ["niche"]:
+                raise admin.InvalidFileType("file is not a valid niche file")
+
             # RAW rows
             rows = _get_rows(db, file_id)
 
+            filtered_rows = [] # store the valid rows
+
+            for row in rows:
+            
+                name = None
+                has_valid_value = False
+
+                for header, value in row.items():    
+                    keyword = _classify_niche(header)
+
+                    if keyword == "tutorial":
+
+                        if value: # we have a tutorial name
+
+                            if value.lower().strip() == "total": # invalid tutorial name
+                                break
+                            
+                            name = value # found a valid tutorial name
+
+                        else: # tutorial has no name
+                            break
+                    
+                    elif keyword == "total": # dont care about this header
+                        continue
+                        
+                    else: # must be the date column
+                        try:
+                            val = int(value)
+                            if val > 0: # we only care if tutorial has at least 1 view
+                                has_valid_value = True
+                                continue
+                        except:
+                            break
+                
+                if not name:
+                    continue
+
+                if not has_valid_value:
+                    continue
+                
+                filtered_rows.append(row)
+
             # collect tutorial names
-            tutorial_names = list({"tutorial_name": row.get("Tutorial")} for row in rows[:-1])
-            if None in tutorial_names:
-                raise ValueError("Missing tutorial name")
+            tutorial_names = []
+
+            for row in filtered_rows:
+                
+                for header, value in row.items():    
+                    keyword = _classify_niche(header)
+
+                    if keyword == "tutorial":
+                        tutorial_names.append({"tutorial_name": value})
             
             # batch insert tutorials
             if tutorial_names:
@@ -513,21 +729,37 @@ def run_transform_logic(db) -> None:
             # build batch insert for metrics
             seen = set()
             tutorial_metrics = []
-            for row in rows[:-1]:
-                tutorial_id = tutorial_mapping[row["Tutorial"]]
-                for key, value in row.items():
-                    if key not in ["Tutorial", "Total"]:
-                        metric_date = parser.parse(key).replace(day=1).date()
-                        if (tutorial_id, metric_date) in seen:
-                            continue
-                        seen.add((tutorial_id, metric_date))
-                        total_views = int(value)
-                        tutorial_metrics.append({
-                            "tutorial_id": tutorial_id,
-                            "metric_date": metric_date,
-                            "total_views": total_views,
-                            "uploaded_file_id": file_id
-                        })
+
+            for row in filtered_rows:
+                
+                tutorial_id = None
+                metric_date = None
+                total_views = None
+
+                for header, value in row.items():
+                    keyword = _classify_niche(header)
+
+                    if keyword == "tutorial":
+                        tutorial_id = tutorial_mapping[value]
+
+                    elif keyword == "total":
+                        continue
+
+                    else:
+                        metric_date = parser.parse(header).replace(day=1).date()
+                        total_views = value
+
+                if (tutorial_id, metric_date) in seen:
+                    continue
+                    
+                seen.add((tutorial_id, metric_date))
+
+                tutorial_metrics.append({
+                    "tutorial_id": tutorial_id,
+                    "metric_date": metric_date,
+                    "total_views": total_views,
+                    "uploaded_file_id": file_id
+                })
 
             # batch insert tutorial_metric
             if tutorial_metrics:
@@ -535,13 +767,490 @@ def run_transform_logic(db) -> None:
                
             _set_transform_status(db, "completed", file_id)
                 
-        # Special handling here to not trigger the get_db() logic in order to save file status.
         except Exception as e:
-            db.rollback()
-            logger.exception(f"Failed to transform row. ERROR: {e}")
+            logger.exception(f"Failed to transform niche row. ERROR: {e}")
             _set_transform_status(db, "failed", file_id, str(e))
-            db.commit()
+            _delete_file_from_storage(storage_path)
+            raise
 
+
+# ======================================================
+# LIBCAL TRANSFORMATION LOGIC
+# ======================================================
+
+
+def run_libcal_transform_logic(db, source):
+    
+    while True:
+
+        try:
+            payload = queries.claim_transform_file(db, source)
+
+            if payload is None:
+                break
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+
+            file_type = _classify_file(file_reader)
+
+            if file_type not in ["libcal"]:
+                raise admin.InvalidFileType("file is not a valid libcal file")
+            
+            # RAW rows
+            rows = _get_rows(db, file_id)
+
+            seen = set()
+            events_batch = []
+
+            for row in rows:
+
+                attended = False
+                online_event = False
+                in_person_event = False
+
+                event_id = None
+                start_date = None
+                end_date = None
+                start_time = None
+                end_time = None
+                first_name = None
+                last_name = None
+                registrant_name = None
+                organization = None
+                tag = None
+                event_title = None
+                event_type = None
+                total_confirmed_registrants = None # how many people actually went
+                total_number_registrants = None    # how many people registered
+                
+                for header, value in row.items():
+
+                    keyword = _classify_libcal(header)
+
+                    if keyword == "event id":
+
+                        if value:
+                            event_id = value.strip()
+
+                    elif keyword == "start date":
+
+                        if value:
+
+                            try:
+                                start_date = parser.parse(value).date()
+                            except:
+                                break
+
+                    elif keyword == "end date":
+                        
+                        if value:
+
+                            try:
+                                end_date = parser.parse(value).date()
+                            except:
+                                break
+
+                    elif keyword == "start time":
+
+                        if value:
+
+                            try:
+                                start_time = time.fromisoformat(value)
+                            except:
+                                break
+
+                    elif keyword == "end time":
+                        
+                        if value:
+
+                            try:
+                                end_time = time.fromisoformat(value)
+                            except:
+                                break
+
+                    elif keyword == "tag":
+                        
+                        if value:
+                            tag = value.strip()
+                    
+                    elif keyword == "attended":
+
+                        if value:
+                        
+                            if value.lower().strip() == "yes":
+                                attended = True
+
+                    elif keyword == "in-person seats":
+
+                        if value:
+
+                            try:
+                                total_seats = int(value)
+                                if total_seats > 0:
+                                    in_person_event = True
+                            except:
+                                break
+
+                    elif keyword == "online seats":
+                        
+                        if value:
+
+                            try:
+                                total_seats = int(value)
+                                if total_seats > 0:
+                                    online_event = True
+                            except:
+                                break
+
+                    elif keyword == "first name":
+
+                        if value:
+                            first_name = value.lower().strip()
+                
+                    elif keyword == "last name":
+
+                        if value:
+                            last_name = value.lower().strip()
+
+                    elif keyword == "full name":
+
+                        if value:
+                            first_name, last_name = value.split()
+                            first_name = first_name.lower().strip()
+                            last_name = last_name.lower().strip()
+
+                    elif keyword == "registrant name":
+
+                        if value:
+                            first_name, last_name = value.split()
+                            first_name = first_name.lower().strip()
+                            last_name = last_name.lower().strip()
+
+                    elif keyword == "affiliated organization":
+
+                        if value:
+
+                            if value.lower().strip() != "other":
+                                organization = value.lower().strip()
+
+                    elif keyword == "not-affiliated organization":
+
+                        if value:
+
+                            if not organization:
+                                organization = value.lower().strip()
+
+                    elif keyword == "event title":
+
+                        if value:
+                            event_title = value.lower().strip()
+
+                    elif keyword == "confirmed registrants":
+
+                        if value:
+
+                            try:
+                                total_number_registrants = int(value)
+                            except:
+                                break
+
+                    elif keyword == "confirmed attendance":
+
+                        if value:
+
+                            try:
+                                total_confirmed_registrants = int(value)
+                            except:
+                                break
+
+                # check row is valid for insertion
+
+                if not attended:
+                    continue
+
+                if not first_name:
+                    continue
+
+                if not last_name:
+                    continue
+
+                if not event_title:
+                    continue
+
+                if in_person_event and online_event:
+                    event_type = "hybrid"
+                
+                elif in_person_event:
+                    event_type = "in-person"
+                
+                elif online_event:
+                    event_type = "online"
+
+                else:
+                    continue
+
+                key = (event_id, first_name, last_name, event_title, start_time, end_time, start_date, end_date)
+            
+                if key in seen:
+                    continue
+
+                seen.add(key)
+            
+                registrant_name = first_name + " " + last_name
+
+                events_batch.append({
+                    "event_id": event_id,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "registrant_name": registrant_name,
+                    "organization": organization,
+                    "tag": tag,
+                    "event_title": event_title,
+                    "event_type": event_type,
+                    "total_confirmed_registrants": total_confirmed_registrants,
+                    "total_number_registrants": total_number_registrants,
+                    "uploaded_file_id": file_id
+                })
+               
+            if events_batch:
+                _insert_events_data(db, events_batch)
+
+            _set_transform_status(db, "completed", file_id)
+
+        except Exception as e:
+            logger.exception(f"Failed to transform libcal row. ERROR: {e}")
+            _set_transform_status(db, "failed", file_id, str(e))
+            _delete_file_from_storage(storage_path)
+            raise
+
+
+
+# ======================================================
+# MYTURN TRANSFORMATION LOGIC
+# ======================================================
+
+
+def run_myturn_transform_logic(db, source):
+    
+    while True:
+
+        try:
+            payload = queries.claim_transform_file(db, source)
+
+            if payload is None:
+                break
+
+            storage_path = payload.storage_path
+            file_id = payload.uploaded_file_id
+
+            file_bytes = supabase.storage.from_("raw_uploads").download(storage_path)
+
+            file_reader = _load_csv_reader(file_bytes)
+
+            file_type = _classify_file(file_reader)
+
+            if file_type not in ["loans", "items"]:
+                raise admin.InvalidFileType("file is not a valid myturn file")
+            
+            # RAW rows
+            rows = _get_rows(db, file_id)
+
+            loan_batch = []
+            items_batch = []
+
+            if file_type == "loans":
+                
+                for row in rows:
+
+                    first_name = None
+                    last_name = None
+                    
+                    loan_id = None
+                    client_name = None
+                    organization = None
+                    item_name = None
+                    item_id = None
+                    checkout_at = None
+                    returned_at = None
+                    renewal = False
+
+                    for header, value in row.items():
+                
+                        keyword = _classify_myturn(header)
+
+                        if keyword == "loan id":
+                
+                            try:
+                                loan_id = int(value.strip())
+
+                            except:
+                                break
+                        
+                        elif keyword == "first name":
+                        
+                                try:
+                                    first_name = value.lower().strip()
+
+                                except:
+                                    break
+
+                        
+                        elif keyword == "last name":
+                         
+                                try:
+                                    last_name = value.lower().strip()
+
+                                except:
+                                    break
+    
+                        elif keyword == "organization":
+
+                                try:
+                                    organization = value.lower().strip()
+                                
+                                except:
+                                    break
+
+                    
+
+                        elif keyword == "item id":
+
+                                try:
+                                    item_id = int(value.strip())
+                                
+                                except:
+                                    break
+                           
+                        elif keyword == "item name":
+
+                                try:
+                                    item_name = value.lower().strip()
+
+                                except:
+                                    break
+
+                        elif keyword == "checked out":
+
+                                try:
+                                    checkout_at = parser.parse(value)
+
+                                except:
+                                    break
+                            
+                        elif keyword == "checked in":
+
+                                try:
+                                    returned_at = parser.parse(value)
+
+                                except:
+                                    break
+
+                        elif keyword == "renewal":
+
+                                if value.lower().strip() == "renewal":
+
+                                    renewal = True
+
+                                else:
+                                    continue
+                                
+                    if not loan_id:
+                        continue
+
+                    if not first_name:
+                        continue
+
+                    if not last_name:
+                        continue
+
+                    if not organization:
+                        continue
+
+                    if not item_name:
+                        continue
+
+                    if not item_id:
+                        continue
+
+                    if not checkout_at:
+                        continue
+
+                    if not returned_at:
+                        continue
+                    
+                    
+                    client_name = first_name + " " + last_name
+
+                    duration = returned_at - checkout_at
+
+                    loan_batch.append({
+                        "loan_id": loan_id,
+                        "client_name": client_name,
+                        "organization": organization,
+                        "item_name": item_name,
+                        "item_id": item_id,
+                        "checkout_at": checkout_at,
+                        "returned_at": returned_at,
+                        "duration": duration,
+                        "renewal": renewal,
+                        "uploaded_file_id": file_id
+                    })                                
+                                
+            else:
+
+                for row in rows:
+
+                    item_id = None
+                    cost = 0.0
+
+                    for header, value in row.items():
+
+                        keyword = _classify_myturn(header)
+
+                        if keyword == "item id":
+
+                                try:
+                                    item_id = int(value)
+                        
+                                except:
+                                    break
+                        
+                        elif keyword == "cost":
+
+                                try:
+                                    cost = float(value)
+                                
+                                except:
+                                    break
+                    
+                    if not item_id:
+                        continue
+
+                    items_batch.append({
+                        "item_id": item_id,
+                        "cost": cost
+                    })
+
+            if loan_batch:
+                queries.insert_loan_metadata(db, loan_batch)
+            
+            if items_batch:
+                queries.insert_items_metadata(db, items_batch)
+            
+            _set_transform_status(db, "completed", file_id)
+
+        except Exception as e:
+            logger.exception(f"Failed to transform myturn row. ERROR: {e}")
+            _set_transform_status(db, "failed", file_id, str(e))
+            _delete_file_from_storage(storage_path)
+            raise
 
 
 # ======================================================
@@ -581,18 +1290,7 @@ def _get_rows(db, file_id) -> list[dict]:
 
 
 # ======================================================
-# INSERTS THE TUTORIAL DATA
-# ======================================================
-
-
-def _insert_tutorial_metrics(db, tutorial_metrics) -> None:
-
-    queries.insert_tutorial_data(db, tutorial_metrics)
-
-
-
-# ======================================================
-# INSERTS TUTORIAL NAME
+# NICHE HELPER FUNCTIONS
 # ======================================================
 
 
@@ -601,9 +1299,9 @@ def _insert_tutorials(db, tutorial_names) -> None:
     return queries.insert_tutorial_names(db, tutorial_names)
 
 
-# ======================================================
-# BUILDS MAP OF TUTORIAL NAME -> TUTORIAL ID 
-# ======================================================
+def _insert_tutorial_metrics(db, tutorial_metrics) -> None:
+
+    queries.insert_tutorial_data(db, tutorial_metrics)
 
 
 def _get_tutorial_mapping(db) -> dict:
@@ -611,14 +1309,172 @@ def _get_tutorial_mapping(db) -> dict:
     return queries.tutorial_mapping(db)
 
 
-# ======================================================
-# BUILDS THE TOP TUTORIALS DTO RESPONSE
-# ======================================================
-
-
 def _build_top_tutorials_dto(rows: list[Row]) -> list[TopTutorials]:
 
     return list({"tutorial_name": row.tutorial_name, "total_views": row.total_views} for row in rows)
+
+
+def _build_tutorial_views_dto(rows: list[Row]) -> TutorialViews:
+    
+    total = 0 # sum of all views
+    data = []
+    for row in rows:
+        date = row.get("metric_date")
+        try:
+            date = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            # means we got the total "date" alias
+            total = int(row.get("views"))
+            continue
+        views = row.get("views")
+        data.append({"date": date, "views": views})
+
+    return TutorialViews(data=data, total=total)
+
+
+def _classify_niche(header: str) -> Literal["tutorial", "total", "date"]:
+
+    h = header.lower().strip()
+
+    if "tutorial" in h or "tutorial title" in h or "course" in h:
+        return "tutorial"
+    
+    elif "total" in h or "sum" in h or "total views" in h or "attendance" in h:
+        return "total"
+    
+    return "date"
+
+
+# ======================================================
+# LIBCAL HELPER FUNCTIONS
+# ======================================================
+
+
+def _insert_events_data(db, batch) -> None:
+
+    queries.insert_event_metadata(db, batch)
+
+def _classify_libcal(header: str) -> str | None:
+
+    h = header.lower().strip()
+
+    if "event" in h and "id" in h:
+        return "event id"
+
+    elif "start date" in h or "start-date" in h:
+        return "start date"
+
+    elif "end date" in h or "end-date" in h:
+        return "end date"
+
+    elif "start time" in h or "start-time" in h:
+        return "start time"
+
+    elif "end time" in h or "end-time" in h:
+        return "end time"
+
+    elif "internal tag" in h:
+        return "tag"
+
+    elif "tag" in h:
+        return "tag"
+    
+    elif "attended" in h or "present" in h:
+        return "attended"
+
+    elif "in-person" in h:
+        return "in-person seats"
+
+    elif "online" in h:
+        return "online seats"
+    
+    elif "first" in h and "name" in h:
+        return "first name"
+    
+    elif "last" in h and "name" in h:
+        return "last name"
+    
+    elif "full name" in h:
+        return "full name"
+
+    elif any(word in h for word in ["registrant name", "person name", "registrant"]):
+        return "registrant name"
+    
+    elif any(word in h for word in ["organization", "affiliation"]):
+        return "affiliated organization"
+    
+    elif "not" in h and ("member" in h or "organization" in h):
+        return "not-affiliated organization"
+    
+    elif "event" in h and "title" in h or "title" in h:
+        return "event title"
+    
+    elif "confirmed" in h and "registration" in h:
+        return "confirmed registrants"
+    
+    elif "confirmed" in h and "attend" in h:
+        return "confirmed attendance"
+
+    return None
+
+def _build_event_count_dto(rows: list[dict]) -> TotalEvents:
+
+    total = 0
+    data = []
+    for row in rows:
+
+        if row.get("event_type") == "total":
+            total = row.get("total_events")
+        else:
+            data.append({"event_type": row.get("event_type"), "total": row.get("total_events")})
+    
+    return TotalEvents(data=data, total=total)
+
+
+# ======================================================
+# MYTURN HELPER FUNCTIONS
+# ======================================================
+
+
+def _classify_myturn(header: str) -> str | None:
+
+    # logger.debug(f"header original: {header}")
+
+    h = header.lower().strip()
+
+    # logger.debug(f"header after: {h}")
+
+    if "loan" in h and "id" in h:
+        return "loan id"
+    
+    elif "first" in h and "name" in h:
+        return "first name"
+    
+    elif "last" in h and "name" in h:
+        return "last name"
+    
+    elif "organization" in h:
+        return "organization"
+    
+    elif "item" in h and "id" in h:
+        return "item id"
+    
+    elif "item" in h and "name" in h:
+        return "item name"
+    
+    elif "checked" in h and "out" in h:
+        return "checked out"
+    
+    elif "checked" in h and "in" in h:
+        return "checked in"
+    
+    elif "renewal" in h:
+        return "renewal"
+    
+    elif "cost" in h:
+        return "cost"
+    
+    return None
 
 
 # ======================================================
@@ -630,4 +1486,132 @@ def top_tutorials(db, limit, start_date, end_date) -> list[TopTutorials]:
 
     rows = queries.get_top_tutorials(db, limit, start_date, end_date)
     return _build_top_tutorials_dto(rows)
+
+
+# ======================================================
+# FETCHES TUTORIAL VIEWS BY MONTH
+# ======================================================
+
+
+def tutorial_views(db, start_date, end_date) -> TutorialViews:
+
+    rows = queries.get_tutorial_views(db, start_date, end_date)
+    return _build_tutorial_views_dto(rows)
+
+
+# ======================================================
+# PERFORMS BATCH INSERTION INTO RAW ROWS FOR NICHE
+# ======================================================
+
+
+def _insert_raw_rows_batch(db, file_reader: bytes, file_id: UUID) -> None:
+
+    # Multi-value insert method
+    batch = []
+    BATCH_LIMIT = 5000
+    for row_number, row in enumerate(file_reader, start=1):
+        batch.append({
+            "uploaded_file_id": file_id,
+            "raw_data": row,
+            "row_number": row_number
+        })
+        # 5000 rows of data
+        if len(batch) >= BATCH_LIMIT:
+            inserted_ids = _insert_raw_row(db, batch)
+            # check we actually inserted 5000 rows of data
+            assert inserted_ids == len(batch)
+            batch.clear()
+
+    if batch:
+        inserted_ids = _insert_raw_row(db, batch)
+        assert inserted_ids == len(batch)
+
+
+# ======================================================
+# PARSES AND PREPARES THE CSV FILE
+# ======================================================
+
+
+def _load_csv_reader(file_bytes: bytes) -> csv.DictReader:
+    # removes the BOM by using utf-8-sig
+    file_text = file_bytes.decode(encoding='utf-8-sig')
+    # creates an in-memory file-like object for strings so it can be used by DictReader
+    file_stream = io.StringIO(file_text)
+    # reads a CSV file and returns each row as a dictionary instead of a list so we can access by name
+    file_reader = csv.DictReader(file_stream)
+
+    return file_reader
+
+
+# ======================================================
+# GETS FILES TO DISPLAY FOR FRONTEND
+# ======================================================
+
+
+def file_data_dto(db, source, page) -> FileListResponse:
+
+    ROW_LIMIT = 25
+    offset_value = (page - 1) * ROW_LIMIT
+    rows = queries.get_file_data(db, offset_value, source)
+    has_next = False
+
+    data = []
+    counter = 0
+    for row in rows:
+        if counter > 25:
+            has_next = True
+            break
+        first_name = row.first_name.title()
+        last_name = row.last_name.title()
+        full_name = first_name + " " + last_name
+
+        row_dict = {
+            "uploaded_file_id": row.uploaded_file_id,
+            "uploaded_by": full_name,
+            "uploaded_at": row.uploaded_at.date(),
+            "original_file_name": row.original_file_name,
+            "ingestion_status": row.ingestion_status,
+            "transform_status": row.transform_status
+        }
+
+        data.append(row_dict)
     
+    return FileListResponse(data=data, source=source ,page=page, limit=ROW_LIMIT, has_next=has_next)
+        
+
+# ======================================================
+# EVENT COUNT BY TYPE
+# ======================================================
+
+def event_count(db, start_date, end_date) -> TotalEvents:
+
+    rows = queries.get_event_count_by_type(db, start_date, end_date)
+    return _build_event_count_dto(rows)
+
+
+def get_top_items(db, limit) -> TopCheckedOutItems:
+
+    data = queries.get_most_checkedout_items(db, limit)
+
+    return TopCheckedOutItems(data=data)
+
+
+
+# ======================================================
+# TOP ORGANIZATIONS
+# ======================================================
+
+def fetch_top_organizations(db, limit) -> TopOrganizations:
+
+    data = queries.get_top_organizations(db, limit)
+
+    return TopOrganizations(data=data)
+
+# ======================================================
+# VALIDATE DATE RANGE
+# ======================================================
+
+def is_valid_date_range(start_date: date, end_date: date) -> None:
+    
+    if not start_date <= end_date:
+        raise admin.InvalidDateRange

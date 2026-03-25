@@ -1,12 +1,13 @@
 
-#                      ORM MODEL
+#                            ORM MODEL
+
 
 # ======================================================
 # EXTERNAL IMPORTS
 # ======================================================
 
 
-from sqlalchemy import Column, TEXT, text
+from sqlalchemy import Column, BIGINT, NUMERIC, text
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -18,10 +19,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from backend.models.model_config import Base
 
 
-class UploadedFiles(Base):
 
-    __tablename__    = "uploaded_files"
+class Items(Base):
 
-    uploaded_file_id = Column(UUID, primary_key=True, server_default=text("gen_random_uuid()"))
-    storage_path     = Column(TEXT, nullable=False, unique=True)
-    
+    __tablename__    = "items"
+
+    id               = Column(UUID, primary_key=True, server_default=text("gen_random_uuid()"))
+    item_id          = Column(BIGINT, nullable=False)
+    cost             = Column(NUMERIC(10, 2), nullable=False)

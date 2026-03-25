@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-engine = create_engine(os.getenv("NELSON_DATABASE_URL"), pool_size=5, max_overflow=5, pool_pre_ping=True)
+engine = create_engine(os.getenv("NELSON_DATABASE_URL"), pool_size=5, max_overflow=5, pool_pre_ping=True, echo=False)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -26,9 +26,11 @@ def get_db():
     try:
         yield db
         db.commit()
+
     except Exception as e:
         logger.exception(f"database error: {e}")
         db.rollback()
         raise
+    
     finally:
         db.close()

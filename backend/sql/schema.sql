@@ -55,13 +55,16 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     transform_started_at TIMESTAMPTZ DEFAULT NULL,
     transform_completed_at TIMESTAMPTZ DEFAULT NULL,
 
-
+    FOREIGN KEY (uploaded_by) REFERENCES users(user_id),
     CHECK (ingestion_status IN ('pending', 'processing', 'completed', 'failed')),
     CHECK (source IN ('libcal', 'myturn', 'niche')),
     CHECK (transform_status IN ('pending', 'processing', 'completed', 'failed'))
 );
 
-CREATE INDEX  IF NOT EXISTS idx_uploaded_files_transform_pending
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_uploaded_at
+ON uploaded_files (uploaded_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_transform_pending
 ON uploaded_files (ingestion_status, transform_status);
 
 CREATE TABLE IF NOT EXISTS raw_rows (
@@ -98,4 +101,57 @@ CREATE TABLE IF NOT EXISTS tutorial_metrics (
     PRIMARY KEY (tutorial_id, metric_date),
     FOREIGN KEY (tutorial_id) REFERENCES tutorials(tutorial_id) ON DELETE CASCADE,
     FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
+);
+
+
+/*
+ * Libcal Canonical Table
+ */
+
+
+CREATE TABLE IF NOT EXISTS events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    registrant_name TEXT NOT NULL,
+    organization TEXT,
+    tag TEXT NOT NULL,
+    event_title TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    total_confirmed_registrants INTEGER NOT NULL,
+    total_number_registrants INTEGER NOT NULL,
+    uploaded_file_id UUID NOT NULL,
+    UNIQUE(registrant_name, start_date, end_date, event_title, start_time, end_time),
+    CHECK (tag in ('LSTA', 'LCG', 'local')),
+    CHECK (event_type in ('in-person', 'online', 'hybrid')),
+    FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
+);
+
+
+/*
+ * Myturn Canonical Tables
+ */
+
+
+CREATE TABLE IF NOT EXISTS loans (
+    uploaded_file_id UUID NOT NULL,
+    loan_id BIGINT PRIMARY KEY,
+    client_name TEXT NOT NULL,
+    organization TEXT NOT NULL,
+    item_name TEXT NOT NULL,
+    item_id BIGINT NOT NULL,
+    checkout_at TIMESTAMPTZ NOT NULL,
+    returned_at TIMESTAMPTZ NOT NULL,
+    duration INTERVAL NOT NULL,
+    renewal BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    item_id BIGINT NOT NULL UNIQUE,
+    cost NUMERIC(10, 2) NOT NULL
 );

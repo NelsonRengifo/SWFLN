@@ -7,7 +7,7 @@ SET ingestion_status = 'processing', processing_started_at = now()
 WHERE uploaded_file_id = (
     SELECT uploaded_file_id
     FROM uploaded_files
-    WHERE ingestion_status = 'pending'
+    WHERE ingestion_status = 'pending' AND source = :source
     ORDER BY uploaded_at
     LIMIT 1
     FOR UPDATE SKIP LOCKED
