@@ -45,16 +45,9 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     original_file_size_in_bytes BIGINT NOT NULL,
     source TEXT NOT NULL,
     ingestion_status TEXT NOT NULL DEFAULT 'pending',
-    processing_started_at TIMESTAMPTZ DEFAULT NULL,
-    processing_finished_at TIMESTAMPTZ DEFAULT NULL,
+    transform_status TEXT NOT NULL DEFAULT 'pending',
     storage_path TEXT NOT NULL UNIQUE,
     checksum_sha256 TEXT NOT NULL UNIQUE,
-    error_message TEXT DEFAULT NULL,
-    transform_error_message TEXT DEFAULT NULL,
-    transform_status TEXT NOT NULL DEFAULT 'pending',
-    transform_started_at TIMESTAMPTZ DEFAULT NULL,
-    transform_completed_at TIMESTAMPTZ DEFAULT NULL,
-
     FOREIGN KEY (uploaded_by) REFERENCES users(user_id),
     CHECK (ingestion_status IN ('pending', 'processing', 'completed', 'failed')),
     CHECK (source IN ('libcal', 'myturn', 'niche')),
@@ -152,6 +145,8 @@ CREATE TABLE IF NOT EXISTS loans (
 
 CREATE TABLE IF NOT EXISTS items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    uploaded_file_id UUID NOT NULL,
     item_id BIGINT NOT NULL UNIQUE,
-    cost NUMERIC(10, 2) NOT NULL
+    cost NUMERIC(10, 2) NOT NULL,
+    FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
 );
