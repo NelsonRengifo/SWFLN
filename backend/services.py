@@ -28,7 +28,6 @@ from backend import queries, validators
 from backend.schemas import Credentials, Registration
 from backend.exceptions import auth
 from backend.exceptions import admin
-from backend.clients.supabase import supabase
 from backend.dto.upload_dto import FilePathResult
 from backend.schemas import TopTutorials
 from backend.schemas import FileListResponse
