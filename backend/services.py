@@ -534,7 +534,7 @@ def run_niche_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -547,7 +547,7 @@ def run_niche_ingestion_logic(db, source) -> None:
             
         except Exception as e:
             logger.exception(f"Failed to process niche uploaded files. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -575,7 +575,7 @@ def run_libcal_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -588,7 +588,7 @@ def run_libcal_ingestion_logic(db, source) -> None:
 
         except Exception as e:
             logger.exception(f"Failed to process libcal uploaded file. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -615,7 +615,7 @@ def run_myturn_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -630,7 +630,7 @@ def run_myturn_ingestion_logic(db, source) -> None:
 
         except Exception as e:
             logger.exception(f"Failed to process myturn uploaded files. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -780,7 +780,7 @@ def run_niche_transform_logic(db, source) -> None:
                 
         except Exception as e:
             logger.exception(f"Failed to transform niche row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -1037,7 +1037,7 @@ def run_libcal_transform_logic(db, source):
 
         except Exception as e:
             logger.exception(f"Failed to transform libcal row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -1244,6 +1244,7 @@ def run_myturn_transform_logic(db, source):
                         continue
 
                     items_batch.append({
+                        "uploaded_file_id": file_id,
                         "item_id": item_id,
                         "cost": cost
                     })
@@ -1258,7 +1259,7 @@ def run_myturn_transform_logic(db, source):
 
         except Exception as e:
             logger.exception(f"Failed to transform myturn row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -1268,14 +1269,14 @@ def run_myturn_transform_logic(db, source):
 # ======================================================
 
 
-def _set_ingestion_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID, error_message=None):
+def _set_ingestion_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID):
     
-    queries.update_ingestion_status(db, status, file_id, error_message)
+    queries.update_ingestion_status(db, status, file_id)
 
 
-def _set_transform_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID, error_message=None):
+def _set_transform_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID):
     
-    queries.update_transform_status(db, status, file_id, error_message)
+    queries.update_transform_status(db, status, file_id)
 
 
 # ======================================================

@@ -297,21 +297,20 @@ def claim_ingestion_file(db, source) -> Row | None:
 
 
 
-def update_ingestion_status(db, file_status, uploaded_file_id, error_message) -> None:
+def update_ingestion_status(db, file_status, uploaded_file_id) -> None:
 
     params = {
         "ingestion_status": file_status,
-        "uploaded_file_id": uploaded_file_id,
-        "error_message": error_message
+        "uploaded_file_id": uploaded_file_id
     }
     sql = load_sql("update_ingestion_status", "jobs")
     db.execute(text(sql), params)
 
 
-def recover_ingestion_job(db) -> None:
+# def recover_ingestion_job(db) -> None:
 
-    sql = load_sql("recover_ingestion_job", "jobs")
-    db.execute(text(sql))
+#     sql = load_sql("recover_ingestion_job", "jobs")
+#     db.execute(text(sql))
 
 
 def claim_transform_file(db, source) -> Row | None:
@@ -320,21 +319,20 @@ def claim_transform_file(db, source) -> Row | None:
     return db.execute(text(sql), {"source": source}).one_or_none()
 
 
-def update_transform_status(db, file_status, uploaded_file_id, error_message) -> None:
+def update_transform_status(db, file_status, uploaded_file_id) -> None:
     
     params = {
         "transform_status": file_status,
-        "uploaded_file_id": uploaded_file_id,
-        "transform_error_message": error_message
+        "uploaded_file_id": uploaded_file_id
     }
     sql = load_sql("update_transform_status", "jobs")
     db.execute(text(sql), params)
 
 
-def recover_transform_job(db) -> None:
+# def recover_transform_job(db) -> None:
     
-    sql = load_sql("recover_transform_job", "jobs")
-    db.execute(text(sql))
+#     sql = load_sql("recover_transform_job", "jobs")
+#     db.execute(text(sql))
 
 
 def insert_raw_row_data(db, data) -> int:
