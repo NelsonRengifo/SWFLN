@@ -85,3 +85,36 @@ export async function updatePassword(current_password, new_password, confirm_pas
     })
   });
 }
+
+// ============================
+// UPDATE USERNAME
+// ============================
+export async function updateUsername(new_username, confirm_username) {
+  return apiFetch("/auth/update/username", {
+    method: "POST",
+    body: JSON.stringify({
+      new_username,
+      confirm_username
+    })
+  });
+}
+
+// ============================
+// FORGOT USERNAME
+// ============================
+export async function forgotUsername(email) {
+  return apiFetch("/auth/forgot-username", {
+    method: "POST",
+    body: JSON.stringify({ email })
+  });
+}
+
+// ============================
+// REGISTER USER (ADMIN)
+// ============================
+export async function registerUser(payload) {
+  return apiFetch("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}

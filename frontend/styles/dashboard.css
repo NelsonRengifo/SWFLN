@@ -2,80 +2,100 @@
    DASHBOARD GRID
 ================================= */
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
-  gap: 1.5rem;
-  padding: 2rem;
-}
-
-/* =================================
-   DASHBOARD CARDS
-================================= */
-
-.card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #333;
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-
-  border: none;
-  cursor: pointer;
-  text-align: left;
-
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.card h2 {
-  margin-top: 0;
-}
-
-/* =================================
-   UPLOAD SECTION
-================================= */
-
-.upload-section {
-  background: white;
-  margin: 0 2rem 2rem 2rem;
-  padding: 2rem;
-
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.upload-controls {
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 70px;
+  height: 100%;
+  background: #1e293b;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
+  padding-top: 20px;
+  gap: 20px;
 }
 
-/* =================================
-   REPORT SECTION
-================================= */
+.sidebar-icon {
+  font-size: 22px;
+  cursor: pointer;
+  position: relative;
+  color: white;
+}
 
+.sidebar-icon:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 60px;
+  background: #111;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+/* HEADER */
+.app-header {
+  margin-left: 70px;
+  padding: 20px;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* MAIN */
+.main-content {
+  margin-left: 70px;
+  padding: 20px;
+}
+
+/* METRICS GRID */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.metric-card {
+  background: #f1f5f9;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.metric-card h3 {
+  margin-bottom: 10px;
+}
+
+/* REPORT */
 .report-section {
-  margin: 2rem;
-  padding: 2rem;
+  margin-top: 30px;
+}
 
+/* SLIDE PANEL */
+.side-panel {
+  position: fixed;
+  right: -400px;
+  top: 0;
+  width: 400px;
+  height: 100%;
   background: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 20px;
+}
+
+.side-panel.active {
+  right: 0;
 }
 
 .hidden {
   display: none;
 }
 
-.upload-desc{
-  color:#666;
-  margin-bottom:1rem;
+.panel-header {
+  display: flex;
+  justify-content: space-between;
 }

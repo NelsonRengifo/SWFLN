@@ -1,145 +1,143 @@
 // Dashboard Logic
 import { requireAuth } from "../auth/guard.js";
-import { fetchTopTutorials } from "../api/reports.js";
-import { uploadCSV } from "../api/admin.js";
 import { logout } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
 
-// =================================
+import {
+  fetchTopTutorials,
+  fetchTutorialViews,
+  fetchTotalEvents,
+  fetchTopItems,
+  fetchTopOrganizations
+} from "../api/reports.js";
+
+// =====================
 // AUTH GUARD
-// =================================
+// =====================
 requireAuth();
 
-// =================================
-// UI ELEMENTS
-// =================================
-const loadTutorialsBtn = document.getElementById("loadTutorialsBtn");
-const reportSection = document.getElementById("reportSection");
-const reportTitle = document.getElementById("reportTitle");
+// =====================
+// ELEMENTS
+// =====================
+const logoutBtn = document.getElementById("logoutBtn");
 const reportContent = document.getElementById("reportContent");
 
-const logoutBtn = document.getElementById("logoutBtn");
+const panel = document.getElementById("sidePanel");
+const panelContent = document.getElementById("panelContent");
+const panelTitle = document.getElementById("panelTitle");
 
-const uploadBtn = document.getElementById("uploadBtn");
-const fileInput = document.getElementById("csvFile");
-const sourceSelect = document.getElementById("source");
+// =====================
+// DATE RANGE (LAST 30 DAYS)
+// =====================
+function getLast30DaysRange() {
+  const today = new Date().toISOString().split("T")[0];
 
-// =================================
-// LOAD TOP TUTORIALS (REAL DATA)
-// =================================
-if (loadTutorialsBtn) {
-  loadTutorialsBtn.addEventListener("click", async () => {
+  const past = new Date();
+  past.setDate(past.getDate() - 30);
 
-    reportTitle.textContent = "Loading Top Tutorials...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchTopTutorials();
-
-      if (!data || data.length === 0) {
-        reportContent.innerHTML = "<p>No data available.</p>";
-        return;
-      }
-
-      renderReport("Top Tutorials", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load report.</p>`;
-
-    }
-
-  });
+  return {
+    start: past.toISOString().split("T")[0],
+    end: today
+  };
 }
 
-// =================================
-// FILE UPLOAD (REAL)
-// =================================
-if (uploadBtn) {
-  uploadBtn.addEventListener("click", async () => {
+// =====================
+// LOAD DASHBOARD DATA
+// =====================
+async function loadDashboard() {
+  try {
+    const { start, end } = getLast30DaysRange();
 
-    const file = fileInput.files[0];
-    const source = sourceSelect.value;
+    // -----------------
+    // TOP TUTORIALS TABLE
+    // -----------------
+    const tutorials = await fetchTopTutorials(10, start, end);
+    renderTable(tutorials);
 
-    if (!file) {
-      showToast("Please select a CSV file");
-      return;
-    }
+    // -----------------
+    // METRICS
+    // -----------------
+    const views = await fetchTutorialViews(start, end);
+    document.getElementById("viewsMetric").textContent =
+      views?.total_views || 0;
 
-    try {
+    const events = await fetchTotalEvents(start, end);
+    document.getElementById("eventsMetric").textContent =
+      events?.total_events || 0;
 
-      await uploadCSV(file, source);
-      showToast("Upload successful");
+    const items = await fetchTopItems(5);
+    document.getElementById("itemsMetric").textContent =
+      items?.[0]?.item_name || "—";
 
-      // ✨ Simulate backend processing
-      setTimeout(() => showToast("Ingestion complete"), 2000);
-      setTimeout(() => showToast("Transform complete"), 4000);
+    const orgs = await fetchTopOrganizations(5);
+    document.getElementById("orgsMetric").textContent =
+      orgs?.[0]?.organization_name || "—";
 
-    } catch (err) {
-
-      console.error(err);
-      showToast("Upload failed");
-
-    }
-
-  });
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to load dashboard");
+  }
 }
 
-// =================================
-// LOGOUT
-// =================================
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    logout();
-  });
-}
+loadDashboard();
 
-// =================================
-// TABLE RENDERER
-// =================================
-function renderReport(title, data) {
-
-  reportTitle.textContent = title;
-
+// =====================
+// TABLE RENDER
+// =====================
+function renderTable(data) {
   if (!data || data.length === 0) {
     reportContent.innerHTML = "<p>No data available.</p>";
     return;
   }
 
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const tbody = document.createElement("tbody");
-
   const headers = Object.keys(data[0]);
 
-  thead.innerHTML = `
-    <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+  reportContent.innerHTML = `
+    <table>
+      <thead>
+        <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${data.map(row => `
+          <tr>
+            ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
   `;
+}
 
-  data.forEach(row => {
+// =====================
+// SIDEBAR PANEL CONTROL
+// =====================
+document.getElementById("openUploads").onclick = () => {
+  openPanel("Upload Options", `
+    <a href="libcal.html">LibCal Upload</a><br/><br/>
+    <a href="niche.html">Niche Upload</a><br/><br/>
+    <a href="myturn.html">MyTurn Upload</a>
+  `);
+};
 
-    const tr = document.createElement("tr");
+document.getElementById("openSettings").onclick = () => {
+  openPanel("Settings", `
+    <p>Account settings coming soon...</p>
+  `);
+};
 
-    headers.forEach(h => {
+function openPanel(title, content) {
+  panelTitle.textContent = title;
+  panelContent.innerHTML = content;
+  panel.classList.add("active");
+}
 
-      const td = document.createElement("td");
-      td.textContent = row[h] ?? "";
+document.getElementById("closePanel").onclick = () => {
+  panel.classList.remove("active");
+};
 
-      tr.appendChild(td);
-
-    });
-
-    tbody.appendChild(tr);
-
-  });
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-
-  reportContent.innerHTML = "";
-  reportContent.appendChild(table);
-
+// =====================
+// LOGOUT
+// =====================
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", logout);
 }

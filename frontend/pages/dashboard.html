@@ -1,4 +1,4 @@
-<!--Dashboard Page-->
+<!-- Dashboard Page -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,6 +14,35 @@
 
 <body>
 
+<!-- ===================== -->
+<!-- SIDEBAR -->
+<!-- ===================== -->
+<aside class="sidebar">
+
+  <div class="sidebar-icon" data-label="Dashboard">🏠</div>
+
+  <div class="sidebar-icon" id="openUploads" data-label="Uploads">
+    📤
+  </div>
+
+  <div class="sidebar-icon" data-label="Reports" onclick="location.href='reports.html'">
+    📊
+  </div>
+
+  <div class="sidebar-icon" id="openSettings" data-label="Settings">
+    ⚙️
+  </div>
+
+  <div class="sidebar-icon" data-label="Register User" onclick="location.href='register.html'">
+    👤
+  </div>
+
+</aside>
+
+
+<!-- ===================== -->
+<!-- HEADER -->
+<!-- ===================== -->
 <header class="app-header">
   <h1>SWFLN Admin Dashboard</h1>
 
@@ -22,53 +51,63 @@
   </button>
 </header>
 
-<main>
 
-  <!-- Dashboard Cards -->
-  <section class="dashboard-grid">
+<!-- ===================== -->
+<!-- MAIN CONTENT -->
+<!-- ===================== -->
+<main class="main-content">
 
-    <a class="card" href="reports.html">
-      <h2>Top Tutorials</h2>
-      <p>View Most Popular Tutorials</p>
-    </a>
+  <!-- METRICS -->
+  <section class="metrics-grid">
 
-    <a class="card" href="upload.html">
-      <h2>Upload Management</h2>
-      <p>Manage Uploads, View History, and Monitor Processing</p>
-    </a>
+    <div class="metric-card">
+      <h3>Tutorial Views</h3>
+      <p id="viewsMetric">--</p>
+    </div>
+
+    <div class="metric-card">
+      <h3>Event Counts</h3>
+      <p id="eventsMetric">--</p>
+    </div>
+
+    <div class="metric-card">
+      <h3>Top Item</h3>
+      <p id="itemsMetric">--</p>
+    </div>
+
+    <div class="metric-card">
+      <h3>Top Organization</h3>
+      <p id="orgsMetric">--</p>
+    </div>
 
   </section>
 
-  <!-- Upload Section -->
-  <section class="upload-section">
 
-    <h2>Quick CSV Upload</h2>
+  <!-- TOP TUTORIALS TABLE -->
+  <section class="report-section">
+    <h2>Top Tutorials</h2>
 
-    <p class="upload-desc">Upload a dataset directly from the dashboard</p>
-    
-    <div class="upload-controls">
-
-      <input type="file" id="csvFile" accept=".csv" />
-
-      <select id="source">
-        <option value="libcal">LibCal</option>
-        <option value="niche">Niche</option>
-        <option value="myturn">MyTurn</option>
-      </select>
-
-      <button id="uploadBtn">
-       Upload File
-      </button>
+    <div id="reportContent">
+      <p>Loading...</p>
     </div>
   </section>
 
-  <!-- Report Section -->
-  <section id="reportSection" class="report-section hidden">
-    <h2 id="reportTitle"></h2>
-    <div id="reportContent"></div>
-  </section>
-
 </main>
+
+
+<!-- ===================== -->
+<!-- SLIDE PANEL -->
+<!-- ===================== -->
+<div id="sidePanel" class="side-panel hidden">
+
+  <div class="panel-header">
+    <h3 id="panelTitle">Panel</h3>
+    <button id="closePanel">✖</button>
+  </div>
+
+  <div id="panelContent"></div>
+
+</div>
 
 </body>
 </html>
