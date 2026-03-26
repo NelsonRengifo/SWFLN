@@ -6,11 +6,10 @@
 
 
 from pathlib import Path
-from sqlalchemy import text, bindparam
+from sqlalchemy import text, bindparam, delete, func
 from sqlalchemy.engine import Row
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, insert
-from sqlalchemy import delete
 import logging
 
 logger = logging.getLogger(__name__)
@@ -403,3 +402,11 @@ def insert_items_metadata(db, items_batch) -> None:
     insert_obj = insert(Items)
     insert_obj = insert_obj.on_conflict_do_update(index_elements=["item_id"], set_= {"cost": insert_obj.excluded.cost})
     db.execute(insert_obj, items_batch)
+
+
+def delete_old_uploaded_files(db) -> list[str]:
+    # file is old at 2 year mark
+    # returns a list of storage paths
+
+    delete_obj = delete(UploadedFiles).where(UploadedFiles.uploaded_at + text("INTERVAL '2 years'") < func.now()).returning(UploadedFiles.storage_path)
+    return db.execute(delete_obj).scalars().all()
