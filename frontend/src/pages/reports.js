@@ -1,6 +1,7 @@
 import { requireAuth } from "../auth/guard.js";
 import { fetchTopTutorials } from "../api/reports.js";
 import { showToast } from "../utils/toast.js";
+import { loadSidebar } from "../components/sidebar.js";
 
 requireAuth();
 

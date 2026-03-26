@@ -1,7 +1,7 @@
-// Dashboard Logic
 import { requireAuth } from "../auth/guard.js";
 import { logout } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
+import { loadSidebar } from "../components/sidebar.js";
 
 import {
   fetchTopTutorials,
@@ -12,132 +12,134 @@ import {
 } from "../api/reports.js";
 
 // =====================
-// AUTH GUARD
+// INIT
 // =====================
 requireAuth();
 
-// =====================
-// ELEMENTS
-// =====================
-const logoutBtn = document.getElementById("logoutBtn");
-const reportContent = document.getElementById("reportContent");
+document.addEventListener("DOMContentLoaded", () => {
+  loadSidebar("dashboard");
+  // =====================
+  // ELEMENTS
+  // =====================
+  const logoutBtn = document.getElementById("logoutBtn");
+  const reportContent = document.getElementById("reportContent");
 
-const panel = document.getElementById("sidePanel");
-const panelContent = document.getElementById("panelContent");
-const panelTitle = document.getElementById("panelTitle");
+  const panel = document.getElementById("sidePanel");
+  const panelContent = document.getElementById("panelContent");
+  const panelTitle = document.getElementById("panelTitle");
 
-// =====================
-// DATE RANGE (LAST 30 DAYS)
-// =====================
-function getLast30DaysRange() {
-  const today = new Date().toISOString().split("T")[0];
+  const openSettingsBtn = document.getElementById("openSettings");
+  const closePanelBtn = document.getElementById("closePanel");
 
-  const past = new Date();
-  past.setDate(past.getDate() - 30);
+  // =====================
+  // DATE RANGE
+  // =====================
+  function getLast30DaysRange() {
+    const today = new Date().toISOString().split("T")[0];
 
-  return {
-    start: past.toISOString().split("T")[0],
-    end: today
-  };
-}
+    const past = new Date();
+    past.setDate(past.getDate() - 30);
 
-// =====================
-// LOAD DASHBOARD DATA
-// =====================
-async function loadDashboard() {
-  try {
-    const { start, end } = getLast30DaysRange();
-
-    // -----------------
-    // TOP TUTORIALS TABLE
-    // -----------------
-    const tutorials = await fetchTopTutorials(10, start, end);
-    renderTable(tutorials);
-
-    // -----------------
-    // METRICS
-    // -----------------
-    const views = await fetchTutorialViews(start, end);
-    document.getElementById("viewsMetric").textContent =
-      views?.total_views || 0;
-
-    const events = await fetchTotalEvents(start, end);
-    document.getElementById("eventsMetric").textContent =
-      events?.total_events || 0;
-
-    const items = await fetchTopItems(5);
-    document.getElementById("itemsMetric").textContent =
-      items?.[0]?.item_name || "—";
-
-    const orgs = await fetchTopOrganizations(5);
-    document.getElementById("orgsMetric").textContent =
-      orgs?.[0]?.organization_name || "—";
-
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to load dashboard");
-  }
-}
-
-loadDashboard();
-
-// =====================
-// TABLE RENDER
-// =====================
-function renderTable(data) {
-  if (!data || data.length === 0) {
-    reportContent.innerHTML = "<p>No data available.</p>";
-    return;
+    return {
+      start: past.toISOString().split("T")[0],
+      end: today
+    };
   }
 
-  const headers = Object.keys(data[0]);
+  // =====================
+  // LOAD DASHBOARD
+  // =====================
+  async function loadDashboard() {
+    try {
+      const { start, end } = getLast30DaysRange();
 
-  reportContent.innerHTML = `
-    <table>
-      <thead>
-        <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
-      </thead>
-      <tbody>
-        ${data.map(row => `
-          <tr>
-            ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
+      // ---- Top Tutorials ----
+      const tutorials = await fetchTopTutorials(10, start, end);
+      renderTable(tutorials);
 
-// =====================
-// SIDEBAR PANEL CONTROL
-// =====================
-document.getElementById("openUploads").onclick = () => {
-  openPanel("Upload Options", `
-    <a href="libcal.html">LibCal Upload</a><br/><br/>
-    <a href="niche.html">Niche Upload</a><br/><br/>
-    <a href="myturn.html">MyTurn Upload</a>
-  `);
-};
+      // ---- Metrics ----
+      const views = await fetchTutorialViews(start, end);
+      document.getElementById("viewsMetric").textContent =
+        views?.total_views || 0;
 
-document.getElementById("openSettings").onclick = () => {
-  openPanel("Settings", `
-    <p>Account settings coming soon...</p>
-  `);
-};
+      const events = await fetchTotalEvents(start, end);
+      document.getElementById("eventsMetric").textContent =
+        events?.total_events || 0;
 
-function openPanel(title, content) {
-  panelTitle.textContent = title;
-  panelContent.innerHTML = content;
-  panel.classList.add("active");
-}
+      const items = await fetchTopItems(5);
+      document.getElementById("itemsMetric").textContent =
+        items?.[0]?.item_name || "—";
 
-document.getElementById("closePanel").onclick = () => {
-  panel.classList.remove("active");
-};
+      const orgs = await fetchTopOrganizations(5);
+      document.getElementById("orgsMetric").textContent =
+        orgs?.[0]?.organization_name || "—";
 
-// =====================
-// LOGOUT
-// =====================
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", logout);
-}
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to load dashboard");
+    }
+  }
+
+  loadDashboard();
+
+  // =====================
+  // TABLE RENDER
+  // =====================
+  function renderTable(data) {
+    if (!data || data.length === 0) {
+      reportContent.innerHTML = "<p>No data available.</p>";
+      return;
+    }
+
+    const headers = Object.keys(data[0]);
+
+    reportContent.innerHTML = `
+      <table>
+        <thead>
+          <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          ${data.map(row => `
+            <tr>
+              ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // =====================
+  // PANEL CONTROL
+  // =====================
+  function openPanel(title, content) {
+    panelTitle.textContent = title;
+    panelContent.innerHTML = content;
+    panel.classList.add("active");
+  }
+
+  function closePanel() {
+    panel.classList.remove("active");
+  }
+
+  // Settings button
+  if (openSettingsBtn) {
+    openSettingsBtn.addEventListener("click", () => {
+      openPanel("Settings", `
+        <p>Account settings coming soon...</p>
+      `);
+    });
+  }
+
+  if (closePanelBtn) {
+    closePanelBtn.addEventListener("click", closePanel);
+  }
+
+  // =====================
+  // LOGOUT
+  // =====================
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
+
+});

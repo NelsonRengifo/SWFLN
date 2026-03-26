@@ -4,6 +4,7 @@
 
 import { uploadCSV } from "../api/admin.js";
 import { showToast } from "../utils/toast.js";
+import { loadSidebar } from "../components/sidebar.js";
 
 // ======================================================
 // DOM ELEMENTS

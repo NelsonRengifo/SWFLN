@@ -1,5 +1,6 @@
 import { resetPassword } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
+import { loadSidebar } from "../components/sidebar.js";
 
 const form = document.getElementById("resetForm");
 

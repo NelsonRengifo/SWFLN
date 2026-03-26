@@ -1,6 +1,7 @@
 import { registerUser } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
 import { requireAuth } from "../auth/guard.js";
+import { loadSidebar } from "../components/sidebar.js";
 
 // Ensure user is logged in
 requireAuth();

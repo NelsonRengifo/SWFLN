@@ -1,0 +1,41 @@
+<!--Libcal Uploads-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LibCal Upload</title>
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/upload.css" />
+
+  <script type="module" src="/frontend/src/pages/upload-libcal.js" defer></script>
+</head>
+
+<body>
+
+<!-- ===================== -->
+<!-- SIDEBAR -->
+<!-- ===================== -->
+<div id="sidebar"></div>
+
+<header class="app-header">
+  <h1>LibCal Upload</h1>
+  <a href="dashboard.html">← Back to Dashboard</a>
+</header>
+
+<main class="upload-page">
+
+  <div class="upload-card">
+    <h2>Upload LibCal CSV</h2>
+
+    <input type="file" id="fileInput" accept=".csv" />
+
+    <button id="uploadBtn">Upload File</button>
+
+    <p id="statusMsg"></p>
+  </div>
+
+</main>
+
+</body>
+</html>
