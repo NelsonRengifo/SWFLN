@@ -3,7 +3,7 @@
  */
 
 UPDATE uploaded_files
-SET ingestion_status = 'processing', processing_started_at = now()
+SET ingestion_status = 'processing'
 WHERE uploaded_file_id = (
     SELECT uploaded_file_id
     FROM uploaded_files

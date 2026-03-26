@@ -3,7 +3,7 @@
  */
 
 UPDATE uploaded_files
-SET transform_status = 'processing', transform_started_at = NOW()
+SET transform_status = 'processing'
 WHERE uploaded_file_id = (
     SELECT uploaded_file_id
     FROM uploaded_files
