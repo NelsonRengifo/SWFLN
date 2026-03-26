@@ -5,6 +5,7 @@
 
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,8 @@ def run_cleanup_orphan_tutorials() -> None:
 
     try:
         queries.delete_orphan_tutorials(db)
+        db.commit()
+        print(f"Successfully ran 'cleanup_orphan_tutorials.py' on '{datetime.now()}'")
         
     except Exception as e:
         logger.exception(f"Failed to run cleanup orphan tutorials job | ERROR: {e}")

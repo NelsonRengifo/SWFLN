@@ -7,6 +7,7 @@
 
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ def run_delete_expired_tokens() -> None:
     try:
         queries.delete_expired_tokens(db)
         db.commit()
-    
+        print(f"Successfully ran 'delete_expired_tokens.py' on '{datetime.now()}'")
     except Exception as e:
         db.rollback()
         logger.exception(f"Failed to delete expired tokens. ERROR: {e}")
