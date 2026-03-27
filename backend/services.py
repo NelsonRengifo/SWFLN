@@ -1220,7 +1220,7 @@ def run_myturn_transform_logic(db, source):
                     cost = 0.0
 
                     for header, value in row.items():
-
+                        
                         keyword = _classify_myturn(header)
 
                         if keyword == "item id":
@@ -1234,12 +1234,13 @@ def run_myturn_transform_logic(db, source):
                         elif keyword == "cost":
 
                                 try:
+                                    value = value.replace(",", "")
                                     cost = float(value)
-                                
+            
                                 except:
                                     break
                     
-                    if not item_id:
+                    if item_id is None:
                         continue
 
                     items_batch.append({
