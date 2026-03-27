@@ -1612,9 +1612,9 @@ def event_count(db, start_date, end_date) -> TotalEvents:
 # ======================================================
 
 
-def get_top_items(db, limit) -> TopCheckedOutItems:
+def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 
-    data = queries.get_most_checkedout_items(db, limit)
+    data = queries.get_most_checkedout_items(db, start_date, end_date, limit)
 
     return TopCheckedOutItems(data=data)
 
