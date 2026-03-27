@@ -275,10 +275,16 @@ def get_most_checkedout_items(db, start_date, end_date, limit) -> list[dict]:
     return db.execute(text(sql), params).mappings()
 
 
-def get_top_organizations(db, limit) -> list[dict]:
+def get_top_organizations(db, start_date, end_date, limit) -> list[dict]:
+    
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit
+    }
 
     sql = load_sql("get_top_organizations", "admin")
-    return db.execute(text(sql), {"limit": limit}).mappings()
+    return db.execute(text(sql), params).mappings()
 
 
 def get_all_free_items(db) -> list[dict]:
