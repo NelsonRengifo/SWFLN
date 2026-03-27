@@ -1623,9 +1623,9 @@ def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 # TOP ORGANIZATIONS
 # ======================================================
 
-def fetch_top_organizations(db, limit) -> TopOrganizations:
+def fetch_top_organizations(db, start_date, end_date, limit) -> TopOrganizations:
 
-    data = queries.get_top_organizations(db, limit)
+    data = queries.get_top_organizations(db, start_date, end_date, limit)
 
     return TopOrganizations(data=data)
 
