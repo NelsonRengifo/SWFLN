@@ -1,4 +1,3 @@
-// Login Page Logic
 import { login } from "../api/auth.js";
 import { getToken } from "../utils/storage.js";
 
@@ -18,7 +17,6 @@ form.addEventListener("submit", async (e) => {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
 
-  // 🔹 START loading state
   submitBtn.disabled = true;
   submitBtn.dataset.originalText = submitBtn.textContent;
   submitBtn.textContent = "Logging in...";
@@ -26,12 +24,14 @@ form.addEventListener("submit", async (e) => {
 
   try {
     await login(username, password);
+
     window.location.href = "/frontend/pages/dashboard.html";
+
   } catch (err) {
     errorMsg.textContent = err.message || "Login failed";
     errorMsg.classList.remove("hidden");
+
   } finally {
-    // 🔹 END loading state
     submitBtn.disabled = false;
     submitBtn.textContent = submitBtn.dataset.originalText;
     submitBtn.classList.remove("loading");

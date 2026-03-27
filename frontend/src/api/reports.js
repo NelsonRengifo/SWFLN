@@ -1,83 +1,89 @@
 import { apiFetch } from "./fetch.js";
 
 // =================================
-// TOP TUTORIALS
-// GET /admin/tutorials/top
+// HELPER: build query string safely
 // =================================
-export async function fetchTopTutorials(limit = 10, startDate = null, endDate = null) {
+function buildQuery(params) {
+  const query = new URLSearchParams();
 
-  let endpoint = `/admin/tutorials/top?limit=${limit}`;
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      query.append(key, value);
+    }
+  });
 
-  if (startDate) endpoint += `&start_date=${startDate}`;
-  if (endDate) endpoint += `&end_date=${endDate}`;
-
-  return apiFetch(endpoint);
+  return query.toString() ? `?${query.toString()}` : "";
 }
 
 
 // =================================
-// TUTORIAL VIEWS (TOTAL)
-// GET /admin/tutorials/views
+// TOP TUTORIALS
+// =================================
+export async function fetchTopTutorials(limit = 10, startDate = null, endDate = null) {
+  const query = buildQuery({
+    limit,
+    start_date: startDate,
+    end_date: endDate
+  });
+
+  return apiFetch(`/admin/tutorials/top${query}`);
+}
+
+
+// =================================
+// TUTORIAL VIEWS
 // =================================
 export async function fetchTutorialViews(startDate, endDate) {
+  const query = buildQuery({
+    start_date: startDate,
+    end_date: endDate
+  });
 
-  let endpoint = `/admin/tutorials/views?start_date=${startDate}&end_date=${endDate}`;
-
-  return apiFetch(endpoint);
+  return apiFetch(`/admin/tutorials/views${query}`);
 }
 
 
 // =================================
 // TOTAL EVENTS
-// GET /admin/events/total
 // =================================
 export async function fetchTotalEvents(startDate = null, endDate = null) {
+  const query = buildQuery({
+    start_date: startDate,
+    end_date: endDate
+  });
 
-  let endpoint = `/admin/events/total`;
-
-  if (startDate) endpoint += `?start_date=${startDate}`;
-  if (endDate) endpoint += `${startDate ? "&" : "?"}end_date=${endDate}`;
-
-  return apiFetch(endpoint);
+  return apiFetch(`/admin/events/total${query}`);
 }
 
 
 // =================================
 // TOP ITEMS
-// GET /admin/top/items
 // =================================
 export async function fetchTopItems(limit = 10) {
-
   return apiFetch(`/admin/top/items?limit=${limit}`);
 }
 
 
 // =================================
 // TOP ORGANIZATIONS
-// GET /admin/top/organizations
 // =================================
 export async function fetchTopOrganizations(limit = 5) {
-
   return apiFetch(`/admin/top/organizations?limit=${limit}`);
 }
 
 
 // =================================
-// GET FILE LIST (for deletion UI)
-// GET /admin/files
+// FILE LIST (DELETE UI)
 // =================================
 export async function fetchFilesBySource(source, page = 1) {
-
   return apiFetch(`/admin/files?source=${source}&page=${page}`);
 }
 
 
 // =================================
 // DELETE FILES
-// DELETE /admin/delete/files
 // =================================
 export async function deleteFiles(fileIds) {
-
   return apiFetch("/admin/delete/files", {
     method: "DELETE",
     body: JSON.stringify({ files: fileIds })

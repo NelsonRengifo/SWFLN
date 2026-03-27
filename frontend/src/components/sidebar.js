@@ -17,7 +17,7 @@ export function loadSidebar(activePage = "") {
 
       <a href="reports.html" class="sidebar-icon ${activePage === "reports" ? "active" : ""}" data-label="Reports">📊</a>
 
-      <button id="openSettings" class="sidebar-icon" data-label="Settings">⚙️</button>
+      <a href="settings.html" class="sidebar-icon ${activePage === "settings" ? "active" : ""}" data-label="Settings">⚙️</a>
 
       <a href="register.html" class="sidebar-icon ${activePage === "register" ? "active" : ""}" data-label="Register User">👤</a>
 
