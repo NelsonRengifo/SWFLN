@@ -9,7 +9,7 @@ import logging
 import io
 import csv
 from datetime import time, date
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Literal
 from argon2 import exceptions, PasswordHasher
 from uuid import UUID
@@ -129,9 +129,14 @@ def authenticate_reset_token(db, token) -> Row | None:
 # ======================================================
 
 
-def extend_session_expiration(db, token_hash) -> None:
+def extend_session_expiration(db, expires_at ,user_id, token_hash) -> None:
 
-    queries.extend_session_expiry(db, token_hash)
+    LIMIT = timedelta(hours=2) # 2 hours or less till session expires
+
+    if expires_at - datetime.now(timezone.utc) <= LIMIT:
+        logger.debug("---EXTENDING SESSION---")
+        queries.extend_session_expiry(db, user_id, token_hash)
+    logger.debug("--NOTHING TO EXTEND---")
 
 
 # ======================================================
