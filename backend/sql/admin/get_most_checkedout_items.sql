@@ -4,6 +4,10 @@
 
 SELECT item_id, item_name, COUNT(*) as total
 FROM loans
+INNER JOIN uploaded_files ON loans.uploaded_file_id = uploaded_files.uploaded_file_id
+WHERE (:start_date IS NULL or uploaded_files.uploaded_at::DATE >= :start_date)
+      AND
+      (:end_date IS NULL or uploaded_files.uploaded_at::DATE <= :end_date)
 GROUP BY item_name, item_id
 ORDER BY total DESC
-LIMIT :limit;
+LIMIT 10;
