@@ -275,6 +275,11 @@ def get_top_organizations(db, limit) -> list[dict]:
     return db.execute(text(sql), {"limit": limit}).mappings()
 
 
+def get_all_free_items(db) -> list[dict]:
+
+    sql = load_sql("get_all_free_items", "admin")
+    return db.execute(text(sql)).mappings().all()
+
 # ======================================================
 # WORKER FUNCTIONS
 # ======================================================
