@@ -35,6 +35,7 @@ from backend.schemas import TutorialViews
 from backend.schemas import TotalEvents
 from backend.schemas import TopCheckedOutItems
 from backend.schemas import TopOrganizations
+from backend.schemas import FreeItems
 import backend.models
 
 
@@ -1628,6 +1629,18 @@ def fetch_top_organizations(db, limit) -> TopOrganizations:
 
     return TopOrganizations(data=data)
 
+
+# ======================================================
+# FIND ALL ITEMS WITH NO COST OR COST = 0
+# ======================================================
+
+def free_items(db) -> FreeItems:
+
+    rows = queries.get_all_free_items(db)
+    
+    total = len(rows)
+
+    return FreeItems(data=rows, total=total)
 
 # ======================================================
 # VALIDATE DATE RANGE
