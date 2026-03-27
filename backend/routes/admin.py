@@ -165,15 +165,21 @@ def get_total_events(start_date: date | None = None, end_date: date | None = Non
 
 
 @admin_route.get("/top/items", status_code=200, response_model=schemas.TopCheckedOutItems)
-def get_top_items(limit: int = 10, db=Depends(get_db), token=Depends(session_token)):
+def get_top_items(limit: int = 10, start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
 
     try:
         services.authenticate_token(db, token)
-        return services.get_top_items(db, limit)
+
+        if start_date and end_date:
+            services.is_valid_date_range(start_date, end_date)
+
+        return services.get_top_items(db, start_date, end_date, limit)
 
     except auth.InvalidToken:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
     
+    except admin.InvalidDateRange:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date range")
 
 # ======================================================
 # TOP ORGANIZATIONS BASED ON AMOUNT OF LOANS
