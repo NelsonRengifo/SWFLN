@@ -75,6 +75,7 @@ def register(payload: schemas.Registration, db=Depends(get_db), token=Depends(se
 
     try:
         session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         services.has_valid_role(db, session.token_hash, valid_roles)
         user_id = services.register_user(db, payload)
         return {"status": "ok", "user_id": user_id}
@@ -114,6 +115,7 @@ def update_password(payload: schemas.UpdatePassword, db=Depends(get_db), token=D
 
     try:
         session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         services.confirm_password(db, payload.current_password, session.user_id)
         services.enforce_password_policy(db, payload.new_password, session.user_id)
         services.change_user_password(db, payload.new_password, session.user_id)
@@ -138,6 +140,7 @@ def update_username(payload: schemas.UpdateUsername, db=Depends(get_db), token=D
 
     try:
         session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         services.change_user_username(db, payload.new_username, session.user_id)
 
     except auth.InvalidCredentials:
