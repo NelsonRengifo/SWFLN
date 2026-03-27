@@ -534,7 +534,7 @@ def run_niche_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -547,7 +547,7 @@ def run_niche_ingestion_logic(db, source) -> None:
             
         except Exception as e:
             logger.exception(f"Failed to process niche uploaded files. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -575,7 +575,7 @@ def run_libcal_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -588,7 +588,7 @@ def run_libcal_ingestion_logic(db, source) -> None:
 
         except Exception as e:
             logger.exception(f"Failed to process libcal uploaded file. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -615,7 +615,7 @@ def run_myturn_ingestion_logic(db, source) -> None:
 
             if not _is_valid_file(file_reader):
                 logger.warning(f"Missing CSV headers {storage_path}")
-                _set_ingestion_status(db, "failed", file_id, "missing csv headers")
+                # _set_ingestion_status(db, "failed", file_id, "missing csv headers")
                 continue
 
             file_type = _classify_file(file_reader)
@@ -630,7 +630,7 @@ def run_myturn_ingestion_logic(db, source) -> None:
 
         except Exception as e:
             logger.exception(f"Failed to process myturn uploaded files. ERROR: {e}")
-            _set_ingestion_status(db, "failed", file_id, str(e))
+            # _set_ingestion_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -661,6 +661,17 @@ def run_niche_transform_logic(db, source) -> None:
 
             if file_type not in ["niche"]:
                 raise admin.InvalidFileType("file is not a valid niche file")
+            
+            normalized_year = None
+
+            for h in file_reader.fieldnames:
+
+                keyword = _classify_niche(h)
+
+                if keyword == 'date':
+                    month, two_digit_year = h.split()
+                    two_digit_year = int(two_digit_year)
+                    normalized_year = _normalize_year(two_digit_year) 
 
             # RAW rows
             rows = _get_rows(db, file_id)
@@ -746,7 +757,7 @@ def run_niche_transform_logic(db, source) -> None:
                         continue
 
                     else:
-                        metric_date = parser.parse(header).replace(day=1).date()
+                        metric_date = parser.parse(header).replace(day=1, year=normalized_year).date()
                         total_views = value
 
                 if (tutorial_id, metric_date) in seen:
@@ -769,7 +780,7 @@ def run_niche_transform_logic(db, source) -> None:
                 
         except Exception as e:
             logger.exception(f"Failed to transform niche row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -1026,10 +1037,9 @@ def run_libcal_transform_logic(db, source):
 
         except Exception as e:
             logger.exception(f"Failed to transform libcal row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
-
 
 
 # ======================================================
@@ -1234,6 +1244,7 @@ def run_myturn_transform_logic(db, source):
                         continue
 
                     items_batch.append({
+                        "uploaded_file_id": file_id,
                         "item_id": item_id,
                         "cost": cost
                     })
@@ -1248,7 +1259,7 @@ def run_myturn_transform_logic(db, source):
 
         except Exception as e:
             logger.exception(f"Failed to transform myturn row. ERROR: {e}")
-            _set_transform_status(db, "failed", file_id, str(e))
+            # _set_transform_status(db, "failed", file_id, str(e))
             _delete_file_from_storage(storage_path)
             raise
 
@@ -1258,14 +1269,14 @@ def run_myturn_transform_logic(db, source):
 # ======================================================
 
 
-def _set_ingestion_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID, error_message=None):
+def _set_ingestion_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID):
     
-    queries.update_ingestion_status(db, status, file_id, error_message)
+    queries.update_ingestion_status(db, status, file_id)
 
 
-def _set_transform_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID, error_message=None):
+def _set_transform_status(db, status: Literal["pending", "processing", "completed", "failed"], file_id: UUID):
     
-    queries.update_transform_status(db, status, file_id, error_message)
+    queries.update_transform_status(db, status, file_id)
 
 
 # ======================================================
@@ -1343,6 +1354,12 @@ def _classify_niche(header: str) -> Literal["tutorial", "total", "date"]:
         return "total"
     
     return "date"
+
+
+def _normalize_year(two_digit_year: int) -> int:
+    
+    CURRENT_CENTURY = 2000
+    return CURRENT_CENTURY + two_digit_year
 
 
 # ======================================================
@@ -1589,12 +1606,16 @@ def event_count(db, start_date, end_date) -> TotalEvents:
     return _build_event_count_dto(rows)
 
 
+# ======================================================
+# GET MOST FREQUENTLY BOUGHT ITEMS
+# ======================================================
+
+
 def get_top_items(db, limit) -> TopCheckedOutItems:
 
     data = queries.get_most_checkedout_items(db, limit)
 
     return TopCheckedOutItems(data=data)
-
 
 
 # ======================================================
@@ -1606,6 +1627,7 @@ def fetch_top_organizations(db, limit) -> TopOrganizations:
     data = queries.get_top_organizations(db, limit)
 
     return TopOrganizations(data=data)
+
 
 # ======================================================
 # VALIDATE DATE RANGE
