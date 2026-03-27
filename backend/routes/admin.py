@@ -5,7 +5,7 @@
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, status
 from typing import Literal
-from datetime import date
+from datetime import date, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -172,6 +172,7 @@ def get_top_items(limit: int = 10, start_date: date | None = None, end_date: dat
 
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
+            end_date = end_date + timedelta(days=1)
 
         return services.get_top_items(db, start_date, end_date, limit)
 
@@ -187,11 +188,15 @@ def get_top_items(limit: int = 10, start_date: date | None = None, end_date: dat
 
 
 @admin_route.get("/top/organizations", status_code=200, response_model=schemas.TopOrganizations)
-def top_organizations(limit: int = 5, db=Depends(get_db), token=Depends(session_token)):
+def top_organizations(limit: int = 5, start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
 
     try:
         services.authenticate_token(db, token)
-        return services.fetch_top_organizations(db, limit)
+        if start_date and end_date:
+            services.is_valid_date_range(start_date, end_date)
+            end_date = end_date + timedelta(days=1)
+            
+        return services.fetch_top_organizations(db, start_date, end_date, limit)
 
     except auth.InvalidToken:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
