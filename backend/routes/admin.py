@@ -237,3 +237,18 @@ def delete(payload: schemas.DeleteFilesRequest, db=Depends(get_db), token=Depend
     
     except admin.FailedToDeleteTutorials:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete tutorial data")
+
+
+# ======================================================
+# FIND ALL ITEMS WHERE COST = 0
+# ======================================================
+
+@admin_route.get("/items/free", status_code=200, response_model=schemas.FreeItems)
+def get_free_items(db=Depends(get_db), token=Depends(session_token)):
+    
+    try:
+        services.authenticate_token(db, token)
+        return services.free_items(db)
+
+    except auth.InvalidToken:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
