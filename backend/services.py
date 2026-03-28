@@ -28,7 +28,6 @@ from backend import queries, validators
 from backend.schemas import Credentials, Registration
 from backend.exceptions import auth
 from backend.exceptions import admin
-from backend.clients.supabase import supabase
 from backend.dto.upload_dto import FilePathResult
 from backend.schemas import TopTutorials
 from backend.schemas import FileListResponse
@@ -36,6 +35,7 @@ from backend.schemas import TutorialViews
 from backend.schemas import TotalEvents
 from backend.schemas import TopCheckedOutItems
 from backend.schemas import TopOrganizations
+from backend.schemas import FreeItems
 import backend.models
 
 
@@ -1221,7 +1221,7 @@ def run_myturn_transform_logic(db, source):
                     cost = 0.0
 
                     for header, value in row.items():
-
+                        
                         keyword = _classify_myturn(header)
 
                         if keyword == "item id":
@@ -1235,12 +1235,13 @@ def run_myturn_transform_logic(db, source):
                         elif keyword == "cost":
 
                                 try:
+                                    value = value.replace(",", "")
                                     cost = float(value)
-                                
+            
                                 except:
                                     break
                     
-                    if not item_id:
+                    if item_id is None:
                         continue
 
                     items_batch.append({
@@ -1611,9 +1612,9 @@ def event_count(db, start_date, end_date) -> TotalEvents:
 # ======================================================
 
 
-def get_top_items(db, limit) -> TopCheckedOutItems:
+def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 
-    data = queries.get_most_checkedout_items(db, limit)
+    data = queries.get_most_checkedout_items(db, start_date, end_date, limit)
 
     return TopCheckedOutItems(data=data)
 
@@ -1622,12 +1623,24 @@ def get_top_items(db, limit) -> TopCheckedOutItems:
 # TOP ORGANIZATIONS
 # ======================================================
 
-def fetch_top_organizations(db, limit) -> TopOrganizations:
+def fetch_top_organizations(db, start_date, end_date, limit) -> TopOrganizations:
 
-    data = queries.get_top_organizations(db, limit)
+    data = queries.get_top_organizations(db, start_date, end_date, limit)
 
     return TopOrganizations(data=data)
 
+
+# ======================================================
+# FIND ALL ITEMS WITH NO COST OR COST = 0
+# ======================================================
+
+def free_items(db) -> FreeItems:
+
+    rows = queries.get_all_free_items(db)
+    
+    total = len(rows)
+
+    return FreeItems(data=rows, total=total)
 
 # ======================================================
 # VALIDATE DATE RANGE

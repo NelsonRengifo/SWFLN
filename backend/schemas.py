@@ -176,3 +176,12 @@ class TopCheckedOutItems(BaseModel):
 
 class TopOrganizations(BaseModel):
     data: list[dict]
+
+
+# ======================================================
+# ITEMS WHERE COST = 0
+# ======================================================
+
+class FreeItems(BaseModel):
+    data: list[dict]
+    total: int
