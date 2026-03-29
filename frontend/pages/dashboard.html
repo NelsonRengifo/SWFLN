@@ -14,72 +14,59 @@
 
 <body>
 
-<!-- ===================== -->
-<!-- SIDEBAR -->
-<!-- ===================== -->
-<div id="sidebar"></div>
+<div class="app-layout">
 
-<!-- ===================== -->
-<!-- HEADER -->
-<!-- ===================== -->
-<header class="app-header">
-  <h1>SWFLN Admin Dashboard</h1>
-  <button id="logoutBtn" class="logout-btn">Logout</button>
-</header>
+  <div id="sidebar"></div>
 
-<!-- ===================== -->
-<!-- MAIN CONTENT -->
-<!-- ===================== -->
-<main class="main-content">
+  <div class="app-content">
 
-  <!-- METRICS -->
-  <section class="metrics-grid">
+    <!-- ===================== -->
+    <!-- HEADER -->
+    <!-- ===================== -->
+    <header class="app-header">
+      <h1>SWFLN Admin Dashboard</h1>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </header>
 
-    <div class="metric-card">
-      <h3>Tutorial Views</h3>
-      <p id="viewsMetric">--</p>
-    </div>
+    <!-- ===================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ===================== -->
+    <main class="main-content">
 
-    <div class="metric-card">
-      <h3>Event Counts</h3>
-      <p id="eventsMetric">--</p>
-    </div>
+      <!-- METRICS -->
+      <section class="metrics-grid">
 
-    <div class="metric-card">
-      <h3>Top Item</h3>
-      <p id="itemsMetric">--</p>
-    </div>
+        <div class="metric-card">
+          <h3>Tutorial Views</h3>
+          <p id="viewsMetric">--</p>
+        </div>
 
-    <div class="metric-card">
-      <h3>Top Organization</h3>
-      <p id="orgsMetric">--</p>
-    </div>
+        <div class="metric-card">
+          <h3>Event Counts</h3>
+          <p id="eventsMetric">--</p>
+        </div>
 
-  </section>
+        <div class="metric-card">
+          <h3>Top Item</h3>
+          <p id="itemsMetric">--</p>
+        </div>
 
-  <!-- TOP TUTORIALS TABLE -->
-  <section class="report-section">
-    <h2>Top Tutorials</h2>
-    <div id="reportContent">
-      <p>Loading...</p>
-    </div>
-  </section>
+        <div class="metric-card">
+          <h3>Top Organization</h3>
+          <p id="orgsMetric">--</p>
+        </div>
 
-</main>
+      </section>
 
-<!-- ===================== -->
-<!-- SLIDE PANEL -->
-<!-- ===================== -->
-<div id="sidePanel" class="side-panel hidden">
-
-  <div class="panel-header">
-    <h3 id="panelTitle">Panel</h3>
-    <button id="closePanel">✖</button>
+      <!-- TOP TUTORIALS TABLE -->
+      <section class="report-section">
+        <h2>Top Tutorials</h2>
+        <div id="reportContent">
+          <p>Loading...</p>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <div id="panelContent"></div>
-
 </div>
-
 </body>
 </html>

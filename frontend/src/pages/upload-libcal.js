@@ -6,13 +6,11 @@ import { loadSidebar } from "../components/sidebar.js";
 requireAuth();
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  loadSidebar("libcal");
-
+  loadSidebar();
   const fileInput = document.getElementById("fileInput");
   const uploadBtn = document.getElementById("uploadBtn");
   const statusMsg = document.getElementById("statusMsg");
-
+  
   if (uploadBtn) {
     uploadBtn.addEventListener("click", async () => {
 

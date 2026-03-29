@@ -4,46 +4,57 @@
   <meta charset="UTF-8" />
   <title>Reports</title>
 
-  <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/dashboard.css" />
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/dashboard.css" />
 </head>
 
 <body>
 
-<!-- ===================== -->
-<!-- SIDEBAR -->
-<!-- ===================== -->
-<div id="sidebar"></div>
+<div class="app-layout">
 
-<header>
-  <h1>Reports</h1>
-  <a href="dashboard.html">Dashboard</a>
-</header>
+  <!-- SIDEBAR -->
+  <div id="sidebar"></div>
 
-<section class="filters">
+  <!-- MAIN CONTENT -->
+  <div class="app-content">
 
-  <label>
-    Limit
-    <input type="number" id="limit" value="10" />
-  </label>
+    <header class="app-header">
+      <h1>Reports</h1>
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </header>
 
-  <label>
-    Start Date
-    <input type="date" id="startDate" />
-  </label>
+    <main class="main-content">
 
-  <label>
-    End Date
-    <input type="date" id="endDate" />
-  </label>
+      <section class="filters">
 
-  <button id="loadReportBtn">Load Report</button>
+        <label>
+          Limit
+          <input type="number" id="limit" value="10" />
+        </label>
 
-</section>
+        <label>
+          Start Date
+          <input type="date" id="startDate" />
+        </label>
 
-<section class="table-container">
-  <div id="reportContent"></div>
-</section>
+        <label>
+          End Date
+          <input type="date" id="endDate" />
+        </label>
+
+        <button id="loadReportBtn">Load Report</button>
+
+      </section>
+
+      <section class="table-container">
+        <div id="reportContent"></div>
+      </section>
+
+    </main>
+
+  </div>
+  
+</div>
 
 <script type="module" src="../src/pages/reports.js"></script>
 

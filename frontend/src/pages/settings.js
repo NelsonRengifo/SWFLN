@@ -6,9 +6,7 @@ import { loadSidebar } from "../components/sidebar.js";
 requireAuth();
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  loadSidebar("settings");
-
+  loadSidebar();
   // =========================
   // UPDATE PASSWORD
   // =========================

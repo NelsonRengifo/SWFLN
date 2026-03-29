@@ -8,30 +8,32 @@
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/upload.css" />
 
-  <!-- ✅ Correct JS -->
   <script type="module" src="/frontend/src/pages/upload-myturn.js" defer></script>
 </head>
 
 <body>
-
+<div class="app-layout">
 <!-- SIDEBAR -->
 <div id="sidebar"></div>
 
-<header class="app-header">
-  <h1>MyTurn Upload</h1>
-  <a href="dashboard.html">← Back to Dashboard</a>
-</header>
+  <div class="app-content">
 
-<main class="upload-page">
-  <div class="upload-card">
-    <h2>Upload MyTurn CSV</h2>
+    <header class="app-header">
+      <h1>MyTurn Upload</h1>
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </header>
 
-    <input type="file" id="fileInput" accept=".csv" />
-    <button id="uploadBtn">Upload File</button>
+    <main class="upload-page">
+      <div class="upload-card">
+        <h2>Upload MyTurn CSV</h2>
 
-    <p id="statusMsg"></p>
+        <input type="file" id="fileInput" accept=".csv" />
+        <button id="uploadBtn">Upload File</button>
+
+        <p id="statusMsg"></p>
+      </div>
+    </main>
   </div>
-</main>
-
+</div>
 </body>
 </html>

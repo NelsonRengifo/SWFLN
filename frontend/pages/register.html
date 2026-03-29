@@ -3,44 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <title>Register User</title>
-  <link rel="stylesheet" href="../styles/forms.css" />
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/forms.css" />
 </head>
+
 <body>
-  <!-- ===================== -->
+
+<div class="app-layout">
+
   <!-- SIDEBAR -->
-  <!-- ===================== -->
   <div id="sidebar"></div>
-  
-  <div class="container">
-    <h2>Register New User</h2>
 
-    <form id="registerForm">
+  <!-- MAIN CONTENT -->
+  <div class="app-content">
 
-      <input type="text" id="username" placeholder="Username" required />
+    <header class="app-header">
+      <h1>Register User</h1>
+      <a href="./dashboard.html">← Back to Dashboard</a>
+    </header>
 
-      <input type="email" id="email" placeholder="Email" required />
+    <main class="main-content">
 
-      <input type="text" id="firstName" placeholder="First Name" required />
+      <div class="form-container">
 
-      <input type="text" id="lastName" placeholder="Last Name" required />
+        <h2>Create New User</h2>
 
-      <input type="password" id="password" placeholder="Password" required />
+        <form id="registerForm">
 
-      <select id="role" required>
-        <option value="">Select Role</option>
-        <option value="admin">Admin</option>
-        <option value="super admin">Super Admin</option>
-      </select>
+          <input type="text" id="username" placeholder="Username" required />
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="text" id="firstName" placeholder="First Name" required />
+          <input type="text" id="lastName" placeholder="Last Name" required />
+          <input type="password" id="password" placeholder="Password" required />
 
-      <button type="submit">Create User</button>
+          <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="super admin">Super Admin</option>
+          </select>
 
-    </form>
+          <button type="submit">Create User</button>
 
-    <p>
-      <a href="./dashboard.html">Back to Dashboard</a>
-    </p>
+        </form>
+        
+      </div>
+
+    </main>
+
   </div>
 
-  <script type="module" src="../src/pages/register.js"></script>
+</div>
+
+<script type="module" src="/frontend/src/pages/register.js"></script>
+
 </body>
 </html>

@@ -13,29 +13,34 @@
 
 <body>
 
-<!-- ===================== -->
+<div class="app-layout">
+
 <!-- SIDEBAR -->
-<!-- ===================== -->
 <div id="sidebar"></div>
 
-<header class="app-header">
-  <h1>Niche Upload</h1>
-  <a href="dashboard.html">← Back to Dashboard</a>
-</header>
+  <div class="app-content">
 
-<main class="upload-page">
+    <header class="app-header">
+      <h1>Niche Upload</h1>
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </header>
 
-  <div class="upload-card">
-    <h2>Upload Niche CSV</h2>
 
-    <input type="file" id="fileInput" accept=".csv" />
 
-    <button id="uploadBtn">Upload File</button>
+    <main class="upload-page">
 
-    <p id="statusMsg"></p>
+      <div class="upload-card">
+        <h2>Upload Niche CSV</h2>
+
+        <input type="file" id="fileInput" accept=".csv" />
+
+        <button id="uploadBtn">Upload File</button>
+
+        <p id="statusMsg"></p>
+      </div>
+
+    </main>
   </div>
-
-</main>
-
+</div>
 </body>
 </html>

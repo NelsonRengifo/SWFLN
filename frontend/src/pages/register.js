@@ -6,45 +6,48 @@ import { loadSidebar } from "../components/sidebar.js";
 // Ensure user is logged in
 requireAuth();
 
-const form = document.getElementById("registerForm");
+document.addEventListener("DOMContentLoaded", () => {
+  loadSidebar();
+  const form = document.getElementById("registerForm");
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const payload = {
-    username: document.getElementById("username").value.trim(),
-    email: document.getElementById("email").value.trim(),
-    first_name: document.getElementById("firstName").value.trim(),
-    last_name: document.getElementById("lastName").value.trim(),
-    password: document.getElementById("password").value.trim(),
-    user_role: document.getElementById("role").value
-  };
+    const payload = {
+      username: document.getElementById("username").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      first_name: document.getElementById("firstName").value.trim(),
+      last_name: document.getElementById("lastName").value.trim(),
+      password: document.getElementById("password").value.trim(),
+      user_role: document.getElementById("role").value
+    };
 
-  // Basic validation
-  if (
-    !payload.username ||
-    !payload.email ||
-    !payload.first_name ||
-    !payload.last_name ||
-    !payload.password ||
-    !payload.user_role
-  ) {
-    showToast("All fields are required");
-    return;
-  }
+    // Basic validation
+    if (
+      !payload.username ||
+      !payload.email ||
+      !payload.first_name ||
+      !payload.last_name ||
+      !payload.password ||
+      !payload.user_role
+    ) {
+      showToast("All fields are required");
+      return;
+    }
 
-  try {
+    try {
 
-    await registerUser(payload);
+      await registerUser(payload);
 
-    showToast("User created successfully");
+      showToast("User created successfully");
 
-    form.reset();
+      form.reset();
 
-  } catch (err) {
+    } catch (err) {
 
-    console.error(err);
-    showToast(err.message || "Registration failed");
+      console.error(err);
+      showToast(err.message || "Registration failed");
 
-  }
+    }
+  });
 });

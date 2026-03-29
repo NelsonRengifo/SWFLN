@@ -2,7 +2,6 @@ import { requireAuth } from "../auth/guard.js";
 import { logout } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
 import { loadSidebar } from "../components/sidebar.js";
-
 import {
   fetchTopTutorials,
   fetchTutorialViews,
@@ -17,19 +16,12 @@ import {
 requireAuth();
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadSidebar("dashboard");
+  loadSidebar();
   // =====================
   // ELEMENTS
   // =====================
   const logoutBtn = document.getElementById("logoutBtn");
   const reportContent = document.getElementById("reportContent");
-
-  const panel = document.getElementById("sidePanel");
-  const panelContent = document.getElementById("panelContent");
-  const panelTitle = document.getElementById("panelTitle");
-
-  const openSettingsBtn = document.getElementById("openSettings");
-  const closePanelBtn = document.getElementById("closePanel");
 
   // =====================
   // DATE RANGE
@@ -107,32 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </tbody>
       </table>
     `;
-  }
-
-  // =====================
-  // PANEL CONTROL
-  // =====================
-  function openPanel(title, content) {
-    panelTitle.textContent = title;
-    panelContent.innerHTML = content;
-    panel.classList.add("active");
-  }
-
-  function closePanel() {
-    panel.classList.remove("active");
-  }
-
-  // Settings button
-  if (openSettingsBtn) {
-    openSettingsBtn.addEventListener("click", () => {
-      openPanel("Settings", `
-        <p>Account settings coming soon...</p>
-      `);
-    });
-  }
-
-  if (closePanelBtn) {
-    closePanelBtn.addEventListener("click", closePanel);
   }
 
   // =====================

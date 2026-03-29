@@ -41,7 +41,7 @@ export async function apiFetch(endpoint, options = {}) {
       }, 1200);
     }
 
-    return null;
+    throw new Error("Unauthorized");
   }
 
   // ===============================

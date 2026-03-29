@@ -5,61 +5,64 @@ import { loadSidebar } from "../components/sidebar.js";
 
 requireAuth();
 
-const loadBtn = document.getElementById("loadReportBtn");
-const reportContent = document.getElementById("reportContent");
+document.addEventListener("DOMContentLoaded", () => {
+  loadSidebar();
+  const loadBtn = document.getElementById("loadReportBtn");
+  const reportContent = document.getElementById("reportContent");
 
-loadBtn.addEventListener("click", loadReport);
+  loadBtn.addEventListener("click", loadReport);
 
-async function loadReport() {
+  async function loadReport() {
 
-  const limit = document.getElementById("limit").value;
-  const startDate = document.getElementById("startDate").value;
-  const endDate = document.getElementById("endDate").value;
+    const limit = document.getElementById("limit").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
 
-  reportContent.innerHTML = "Loading...";
+    reportContent.innerHTML = "Loading...";
 
-  try {
+    try {
 
-    const data = await fetchTopTutorials(limit, startDate, endDate);
+      const data = await fetchTopTutorials(limit, startDate, endDate);
 
-    renderTable(data);
+      renderTable(data);
 
-  } catch (err) {
+    } catch (err) {
 
-    console.error(err);
-    showToast("Failed to load report");
+      console.error(err);
+      showToast("Failed to load report");
+
+    }
 
   }
 
-}
+  function renderTable(data) {
 
-function renderTable(data) {
+    if (!data || data.length === 0) {
+      reportContent.innerHTML = "<p>No data found</p>";
+      return;
+    }
 
-  if (!data || data.length === 0) {
-    reportContent.innerHTML = "<p>No data found</p>";
-    return;
-  }
+    const headers = Object.keys(data[0]);
 
-  const headers = Object.keys(data[0]);
+    const table = document.createElement("table");
 
-  const table = document.createElement("table");
-
-  table.innerHTML = `
-    <thead>
-      <tr>
-        ${headers.map(h => `<th>${h}</th>`).join("")}
-      </tr>
-    </thead>
-    <tbody>
-      ${data.map(row => `
+    table.innerHTML = `
+      <thead>
         <tr>
-          ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+          ${headers.map(h => `<th>${h}</th>`).join("")}
         </tr>
-      `).join("")}
-    </tbody>
-  `;
+      </thead>
+      <tbody>
+        ${data.map(row => `
+          <tr>
+            ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    `;
 
-  reportContent.innerHTML = "";
-  reportContent.appendChild(table);
+    reportContent.innerHTML = "";
+    reportContent.appendChild(table);
 
-}
+  }
+});

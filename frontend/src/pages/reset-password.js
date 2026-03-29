@@ -1,44 +1,48 @@
 import { resetPassword } from "../api/auth.js";
 import { showToast } from "../utils/toast.js";
-import { loadSidebar } from "../components/sidebar.js";
 
-const form = document.getElementById("resetForm");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("resetForm");
 
-const tokenInput = document.getElementById("token");
-const newPasswordInput = document.getElementById("newPassword");
-const confirmPasswordInput = document.getElementById("confirmPassword");
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  const newPasswordInput = document.getElementById("newPassword");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
 
-  const reset_token = tokenInput.value.trim();
-  const new_password = newPasswordInput.value.trim();
-  const confirm_password = confirmPasswordInput.value.trim();
-
-  if (!reset_token || !new_password || !confirm_password) {
-    showToast("All fields are required");
+  if (!token) {
+    showToast("Invalid or missing reset token");
     return;
   }
 
-  if (new_password !== confirm_password) {
-    showToast("Passwords do not match");
-    return;
-  }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
+    const new_password = newPasswordInput.value.trim();
+    const confirm_password = confirmPasswordInput.value.trim();
 
-    await resetPassword(reset_token, new_password, confirm_password);
+    if (!new_password || !confirm_password) {
+      showToast("All fields are required");
+      return;
+    }
 
-    showToast("Password reset successful");
+    if (new_password !== confirm_password) {
+      showToast("Passwords do not match");
+      return;
+    }
 
-    setTimeout(() => {
-      window.location.href = "/frontend/pages/login.html";
-    }, 1500);
+    try {
+      await resetPassword(token, new_password, confirm_password);
 
-  } catch (err) {
+      showToast("Password reset successful");
 
-    console.error(err);
-    showToast(err.message || "Reset failed");
+      setTimeout(() => {
+        window.location.href = "/frontend/pages/login.html";
+      }, 1500);
 
-  }
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || "Reset failed");
+    }
+  });
 });

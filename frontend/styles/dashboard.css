@@ -1,63 +1,15 @@
 /* =================================
-   DASHBOARD GRID
+   dashboard.css
 ================================= */
 
-/* SIDEBAR */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 70px;
-  height: 100%;
-  background: #1e293b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 20px;
-  gap: 20px;
-}
-
-.sidebar-icon {
-  font-size: 22px;
-  cursor: pointer;
-  position: relative;
-  color: white;
-}
-
-.sidebar-icon:hover::after {
-  content: attr(data-label);
-  position: absolute;
-  left: 60px;
-  background: #111;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  white-space: nowrap;
-}
-
-/* HEADER */
-.app-header {
-  margin-left: 70px;
-  padding: 20px;
-  background: #0f172a;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* MAIN */
-.main-content {
-  margin-left: 70px;
-  padding: 20px;
-}
-
-/* METRICS GRID */
+/* metrics grid */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
+/* metric cards */
 .metric-card {
   background: #f1f5f9;
   padding: 20px;
@@ -65,37 +17,7 @@
   text-align: center;
 }
 
-.metric-card h3 {
-  margin-bottom: 10px;
-}
-
-/* REPORT */
+/* report spacing */
 .report-section {
   margin-top: 30px;
-}
-
-/* SLIDE PANEL */
-.side-panel {
-  position: fixed;
-  right: -400px;
-  top: 0;
-  width: 400px;
-  height: 100%;
-  background: white;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.2);
-  transition: 0.3s;
-  padding: 20px;
-}
-
-.side-panel.active {
-  right: 0;
-}
-
-.hidden {
-  display: none;
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
 }
