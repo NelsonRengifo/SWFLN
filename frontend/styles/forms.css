@@ -1,11 +1,12 @@
-.form-container {
-    max-width: 400px;
-    margin: 4rem auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 6px;
+/* forms.css */
 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.form-container {
+  max-width: 400px;
+  margin: 100px auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 form {
@@ -30,4 +31,19 @@ button {
 
 button:hover {
     background: #163b5c;
+}
+
+.form-link {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.form-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.form-link a:hover {
+  text-decoration: underline;
 }

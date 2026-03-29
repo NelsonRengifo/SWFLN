@@ -16,37 +16,18 @@ export async function uploadCSV(file, source) {
 }
 
 // =================================
-// UPLOAD HISTORY
+// GET FILES (FOR DELETE UI)
 // =================================
-export async function fetchUploadHistory() {
-
-  return apiFetch("/admin/uploads");
-
+export async function fetchFiles(source, page = 1) {
+  return apiFetch(`/admin/files?source=${source}&page=${page}`);
 }
 
 // =================================
-// INGESTION STATUS
+// DELETE FILES
 // =================================
-export async function fetchIngestionStatus() {
-
-  return apiFetch("/admin/ingestion");
-
-}
-
-// =================================
-// TRANSFORM STATUS
-// =================================
-export async function fetchTransformStatus() {
-
-  return apiFetch("/admin/transforms");
-
-}
-
-// =================================
-// FILE PROCESSING LOGS
-// =================================
-export async function fetchProcessingLogs() {
-
-  return apiFetch("/admin/logs");
-
+export async function deleteFiles(files) {
+  return apiFetch(`/admin/delete/files`, {
+    method: "DELETE",
+    body: JSON.stringify({ files })
+  });
 }

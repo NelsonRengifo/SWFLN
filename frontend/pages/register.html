@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register User</title>
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/forms.css" />
+</head>
+
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="app-content">
+
+    <header class="app-header">
+      <h1>Register User</h1>
+      <a href="./dashboard.html">← Back to Dashboard</a>
+    </header>
+
+    <main class="main-content">
+
+      <div class="form-container">
+
+        <h2>Create New User</h2>
+
+        <form id="registerForm">
+
+          <input type="text" id="username" placeholder="Username" required />
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="text" id="firstName" placeholder="First Name" required />
+          <input type="text" id="lastName" placeholder="Last Name" required />
+          <input type="password" id="password" placeholder="Password" required />
+
+          <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="super admin">Super Admin</option>
+          </select>
+
+          <button type="submit">Create User</button>
+
+        </form>
+        
+      </div>
+
+    </main>
+
+  </div>
+
+</div>
+
+<script type="module" src="/frontend/src/pages/register.js"></script>
+
+</body>
+</html>

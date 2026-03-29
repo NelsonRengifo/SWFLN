@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings</title>
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <script type="module" src="/frontend/src/pages/settings.js" defer></script>
+</head>
+
+<body>
+
+<div class="app-layout">
+
+  <div id="sidebar"></div>
+
+  <div class="app-content">
+
+    <header class="app-header">
+      <h1>Settings</h1>
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </header>
+
+    <main class="main-content">
+
+      <!-- UPDATE PASSWORD -->
+      <section>
+        <h2>Update Password</h2>
+
+        <input type="password" id="currentPassword" placeholder="Current Password" />
+        <input type="password" id="newPassword" placeholder="New Password" />
+
+        <button id="updatePasswordBtn">Update Password</button>
+      </section>
+
+      <hr/>
+
+      <!-- UPDATE USERNAME -->
+      <section>
+        <h2>Update Username</h2>
+
+        <input type="text" id="newUsername" placeholder="New Username" />
+
+        <button id="updateUsernameBtn">Update Username</button>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

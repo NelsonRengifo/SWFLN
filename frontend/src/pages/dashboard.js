@@ -1,245 +1,111 @@
-// Dashboard Logic
 import { requireAuth } from "../auth/guard.js";
-import { fetchTopTutorials } from "../api/reports.js";
-import {
-  uploadCSV,
-  fetchUploadHistory,
-  fetchIngestionStatus,
-  fetchTransformStatus,
-  fetchProcessingLogs
-} from "../api/admin.js";
 import { logout } from "../api/auth.js";
+import { showToast } from "../utils/toast.js";
+import { loadSidebar } from "../components/sidebar.js";
+import {
+  fetchTopTutorials,
+  fetchTutorialViews,
+  fetchTotalEvents,
+  fetchTopItems,
+  fetchTopOrganizations
+} from "../api/reports.js";
 
-// =================================
-// AUTH GUARD
-// =================================
+// =====================
+// INIT
+// =====================
 requireAuth();
 
-// =================================
-// UI ELEMENTS
-// =================================
-const loadTutorialsBtn = document.getElementById("loadTutorialsBtn");
-const reportSection = document.getElementById("reportSection");
-const reportTitle = document.getElementById("reportTitle");
-const reportContent = document.getElementById("reportContent");
+document.addEventListener("DOMContentLoaded", () => {
+  loadSidebar();
+  // =====================
+  // ELEMENTS
+  // =====================
+  const logoutBtn = document.getElementById("logoutBtn");
+  const reportContent = document.getElementById("reportContent");
 
-const logoutBtn = document.getElementById("logoutBtn");
+  // =====================
+  // DATE RANGE
+  // =====================
+  function getLast30DaysRange() {
+    const today = new Date().toISOString().split("T")[0];
 
-const uploadBtn = document.getElementById("uploadBtn");
-const fileInput = document.getElementById("csvFile");
-const sourceSelect = document.getElementById("source");
+    const past = new Date();
+    past.setDate(past.getDate() - 30);
 
-const loadUploadsBtn = document.getElementById("loadUploadsBtn");
-const loadIngestionBtn = document.getElementById("loadIngestionBtn");
-const loadTransformsBtn = document.getElementById("loadTransformsBtn");
-const loadLogsBtn = document.getElementById("loadLogsBtn");
+    return {
+      start: past.toISOString().split("T")[0],
+      end: today
+    };
+  }
 
-// =================================
-// LOAD TOP TUTORIALS
-// =================================
-if (loadTutorialsBtn) {
-  loadTutorialsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Top Tutorials...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
+  // =====================
+  // LOAD DASHBOARD
+  // =====================
+  async function loadDashboard() {
     try {
+      const { start, end } = getLast30DaysRange();
 
-      const data = await fetchTopTutorials();
-      renderReport("Top Tutorials", data);
+      // ---- Top Tutorials ----
+      const tutorials = await fetchTopTutorials(10, start, end);
+      renderTable(tutorials);
+
+      // ---- Metrics ----
+      const views = await fetchTutorialViews(start, end);
+      document.getElementById("viewsMetric").textContent =
+        views?.total_views || 0;
+
+      const events = await fetchTotalEvents(start, end);
+      document.getElementById("eventsMetric").textContent =
+        events?.total_events || 0;
+
+      const items = await fetchTopItems(5);
+      document.getElementById("itemsMetric").textContent =
+        items?.[0]?.item_name || "—";
+
+      const orgs = await fetchTopOrganizations(5);
+      document.getElementById("orgsMetric").textContent =
+        orgs?.[0]?.organization_name || "—";
 
     } catch (err) {
-
       console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load report.</p>`;
-
+      showToast("Failed to load dashboard");
     }
+  }
 
-  });
-}
+  loadDashboard();
 
-// =================================
-// FILE UPLOAD
-// =================================
-if (uploadBtn) {
-  uploadBtn.addEventListener("click", async () => {
-
-    const file = fileInput.files[0];
-    const source = sourceSelect.value;
-
-    if (!file) {
-      showToast("Please select a CSV file");
+  // =====================
+  // TABLE RENDER
+  // =====================
+  function renderTable(data) {
+    if (!data || data.length === 0) {
+      reportContent.innerHTML = "<p>No data available.</p>";
       return;
     }
 
-    try {
+    const headers = Object.keys(data[0]);
 
-      await uploadCSV(file, source);
-      showToast("Upload successful");
-
-    } catch (err) {
-
-      console.error(err);
-      showToast("Upload failed");
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD UPLOAD HISTORY
-// =================================
-if (loadUploadsBtn) {
-  loadUploadsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Upload History...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchUploadHistory();
-      renderReport("Upload History", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load upload history.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD INGESTION STATUS
-// =================================
-if (loadIngestionBtn) {
-  loadIngestionBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Ingestion Status...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchIngestionStatus();
-      renderReport("Ingestion Status", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load ingestion status.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD TRANSFORM STATUS
-// =================================
-if (loadTransformsBtn) {
-  loadTransformsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading Transform Status...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchTransformStatus();
-      renderReport("Transform Status", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load transform status.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOAD FILE PROCESSING LOGS
-// =================================
-if (loadLogsBtn) {
-  loadLogsBtn.addEventListener("click", async () => {
-
-    reportTitle.textContent = "Loading File Processing Logs...";
-    reportContent.innerHTML = "";
-    reportSection.classList.remove("hidden");
-
-    try {
-
-      const data = await fetchProcessingLogs();
-      renderReport("File Processing Logs", data);
-
-    } catch (err) {
-
-      console.error(err);
-      reportContent.innerHTML = `<p class="error">Failed to load logs.</p>`;
-
-    }
-
-  });
-}
-
-// =================================
-// LOGOUT
-// =================================
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    logout();
-  });
-}
-
-// =================================
-// TABLE RENDERER
-// =================================
-function renderReport(title, data) {
-
-  reportTitle.textContent = title;
-
-  if (!data || data.length === 0) {
-    reportContent.innerHTML = "<p>No data available.</p>";
-    return;
+    reportContent.innerHTML = `
+      <table>
+        <thead>
+          <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          ${data.map(row => `
+            <tr>
+              ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
   }
 
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const tbody = document.createElement("tbody");
+  // =====================
+  // LOGOUT
+  // =====================
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
 
-  const headers = Object.keys(data[0]);
-
-  thead.innerHTML = `
-    <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
-  `;
-
-  data.forEach(row => {
-
-    const tr = document.createElement("tr");
-
-    headers.forEach(h => {
-
-      const td = document.createElement("td");
-      td.textContent = row[h] ?? "";
-
-      tr.appendChild(td);
-
-    });
-
-    tbody.appendChild(tr);
-
-  });
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-
-  reportContent.innerHTML = "";
-  reportContent.appendChild(table);
-
-}
+});
