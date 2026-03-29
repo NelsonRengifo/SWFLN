@@ -1,0 +1,46 @@
+<!--Niche Upload-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Niche Upload</title>
+
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/upload.css" />
+
+  <script type="module" src="/frontend/src/pages/upload-niche.js" defer></script>
+</head>
+
+<body>
+
+<div class="app-layout">
+
+<!-- SIDEBAR -->
+<div id="sidebar"></div>
+
+  <div class="app-content">
+
+    <header class="app-header">
+      <h1>Niche Upload</h1>
+      <a href="dashboard.html">← Back to Dashboard</a>
+    </header>
+
+
+
+    <main class="upload-page">
+
+      <div class="upload-card">
+        <h2>Upload Niche CSV</h2>
+
+        <input type="file" id="fileInput" accept=".csv" />
+
+        <button id="uploadBtn">Upload File</button>
+
+        <p id="statusMsg"></p>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

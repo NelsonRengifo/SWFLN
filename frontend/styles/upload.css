@@ -1,0 +1,32 @@
+/* upload.css */
+
+.upload-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 80px;
+}
+
+.upload-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.upload-card input {
+  margin: 15px 0;
+}
+
+.upload-card button {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+#statusMsg {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
