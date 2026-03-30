@@ -1,16 +1,21 @@
-import { login } from "../api/auth.js";
+import { login, forgotUsername } from "../api/auth.js";
 import { getToken } from "../utils/storage.js";
-import { forgotUsername } from "../api/auth.js";
 
+
+// Redirect if already logged in
 if (getToken()) {
   window.location.href = "/frontend/pages/dashboard.html";
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const errorMsg = document.getElementById("errorMsg");
   const submitBtn = form.querySelector("button[type='submit']");
   const forgotUsernameLink = document.getElementById("forgotUsernameLink");
 
+  // =========================
+  // LOGIN HANDLER
+  // =========================
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -40,18 +45,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  forgotUsernameLink.addEventListener("click", async (e) => {
-    e.preventDefault();
+  // =========================
+  // FORGOT USERNAME HANDLER
+  // =========================
+  if (forgotUsernameLink) {
+    forgotUsernameLink.addEventListener("click", async (e) => {
+      e.preventDefault();
 
-    const email = prompt("Enter your email:");
+      const email = prompt("Enter your email:");
+      if (!email) return;
 
-    if (!email) return;
-
-    try {
-      await forgotUsername(email);
-      alert("If an account exists, your username has been sent.");
-    } catch (err) {
-      alert(err.message);
-    }
-  });
+      try {
+        await forgotUsername(email);
+        alert("If an account exists, your username has been sent.");
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  }
 });

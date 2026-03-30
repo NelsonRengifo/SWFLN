@@ -5,7 +5,7 @@ const API_BASE = "http://localhost:8000";
 
 export async function apiFetch(endpoint, options = {}) {
   const token = getToken();
-  const isFormData = options.body instanceof FormData;
+  const isFormData = options.body && options.body instanceof FormData;
 
   const headers = {
     ...(options.headers || {}),
@@ -57,6 +57,8 @@ export async function apiFetch(endpoint, options = {}) {
       const text = await res.text();
       message = text || message;
     }
+
+    console.error("API ERROR:", endpoint, message);
 
     throw new Error(message);
   }

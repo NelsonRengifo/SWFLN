@@ -45,26 +45,26 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const { start, end } = getLast30DaysRange();
 
-      // ---- Top Tutorials ----
       const tutorials = await fetchTopTutorials(10, start, end);
-      renderTable(tutorials);
+      renderTable(tutorials?.data || tutorials);
 
-      // ---- Metrics ----
       const views = await fetchTutorialViews(start, end);
       document.getElementById("viewsMetric").textContent =
-        views?.total_views || 0;
+        views?.total || 0;
 
       const events = await fetchTotalEvents(start, end);
       document.getElementById("eventsMetric").textContent =
-        events?.total_events || 0;
+        events?.total || 0;
 
       const items = await fetchTopItems(5);
+      const itemsData = items?.data || [];
       document.getElementById("itemsMetric").textContent =
-        items?.[0]?.item_name || "—";
+        itemsData[0]?.item_name || "—";
 
       const orgs = await fetchTopOrganizations(5);
+      const orgsData = orgs?.data || [];
       document.getElementById("orgsMetric").textContent =
-        orgs?.[0]?.organization_name || "—";
+        orgsData[0]?.organization_name || "—";
 
     } catch (err) {
       console.error(err);
@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // TABLE RENDER
   // =====================
   function renderTable(data) {
+    if (!reportContent) return;
     if (!data || data.length === 0) {
       reportContent.innerHTML = "<p>No data available.</p>";
       return;

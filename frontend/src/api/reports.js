@@ -89,3 +89,10 @@ export async function deleteFiles(fileIds) {
     body: JSON.stringify({ files: fileIds })
   });
 }
+
+// =================================
+// FREE ITEMS
+// =================================
+export async function fetchFreeItems() {
+  return apiFetch("/admin/items/free");
+}

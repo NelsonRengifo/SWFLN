@@ -10,11 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadBtn = document.getElementById("loadReportBtn");
   const reportContent = document.getElementById("reportContent");
 
-  loadBtn.addEventListener("click", loadReport);
+  if (loadBtn) {
+    loadBtn.addEventListener("click", loadReport);
+  }
 
   async function loadReport() {
 
-    const limit = document.getElementById("limit").value;
+    const limit = parseInt(document.getElementById("limit").value) || 10;
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
 
@@ -22,7 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
 
-      const data = await fetchTopTutorials(limit, startDate, endDate);
+      const data = await fetchTopTutorials(
+        limit,
+        startDate || null,
+        endDate || null
+      );
 
       renderTable(data);
 
@@ -36,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTable(data) {
-
     if (!data || data.length === 0) {
       reportContent.innerHTML = "<p>No data found</p>";
       return;

@@ -17,6 +17,8 @@ export async function login(username, password) {
   }
 
   setToken(data.token);
+
+  return data;
 }
 
 // --------------------
