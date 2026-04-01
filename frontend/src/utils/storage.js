@@ -1,13 +1,13 @@
 const KEY = "swfln_token";
 
 export function setToken(token) {
-  localStorage.setItem("token", token);
+  localStorage.setItem(KEY, token);
 }
 
 export function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem(KEY);
 }
 
 export function clearToken() {
-  localStorage.removeItem("token");
+  localStorage.removeItem(KEY);
 }
