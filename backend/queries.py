@@ -254,7 +254,7 @@ def get_tutorial_views(db, start_date, end_date) -> list[dict]:
         "end_date": end_date
     }
     sql = load_sql("get_tutorial_views", "admin")
-    return db.execute(text(sql), params).mappings()
+    return db.execute(text(sql), params).mappings().all()
 
 
 def get_event_count_by_type(db, start_date, end_date) -> list[dict]:

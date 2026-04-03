@@ -762,7 +762,7 @@ def run_niche_transform_logic(db, source) -> None:
                         continue
 
                     else:
-                        metric_date = parser.parse(header).replace(day=1, year=normalized_year).date()
+                        metric_date = parser.parse(header).replace(day=31, year=normalized_year).date()
                         total_views = value
 
                 if (tutorial_id, metric_date) in seen:
@@ -1331,21 +1331,27 @@ def _build_top_tutorials_dto(rows: list[Row]) -> list[TopTutorials]:
     return list({"tutorial_name": row.tutorial_name, "total_views": row.total_views} for row in rows)
 
 
-def _build_tutorial_views_dto(rows: list[Row]) -> TutorialViews:
+def _build_tutorial_views_dto(rows: list[dict]) -> TutorialViews:
     
+    # A row has data if at least 2 dictionaries else there is no data.
+    VALID_ROWS_LEN = 2
+
     total = 0 # sum of all views
     data = []
-    for row in rows:
-        date = row.get("metric_date")
-        try:
-            date = datetime.strptime(date, "%Y-%m-%d").date()
-        except ValueError:
-            # means we got the total "date" alias
-            total = int(row.get("views"))
-            continue
-        views = row.get("views")
-        data.append({"date": date, "views": views})
 
+    if len(rows) >= VALID_ROWS_LEN:
+        for row in rows:
+            date = row.get("metric_date")
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d").date()
+            except ValueError:
+                # means we got the total "date" alias
+                total = int(row.get("views"))
+                continue
+            views = row.get("views")
+            data.append({"date": date, "views": views})
+
+        return TutorialViews(data=data, total=total)
     return TutorialViews(data=data, total=total)
 
 
