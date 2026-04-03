@@ -2,17 +2,16 @@ import { login, forgotUsername } from "../api/auth.js";
 import { getToken } from "../utils/storage.js";
 
 
-// Redirect if already logged in
-if (getToken()) {
-  window.location.href = "/frontend/pages/dashboard.html";
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const errorMsg = document.getElementById("errorMsg");
   const submitBtn = form.querySelector("button[type='submit']");
   const forgotUsernameLink = document.getElementById("forgotUsernameLink");
 
+  // Redirect if already logged in
+  if (getToken()) {
+    window.location.href = "/frontend/pages/dashboard.html";
+  }
   // =========================
   // LOGIN HANDLER
   // =========================
