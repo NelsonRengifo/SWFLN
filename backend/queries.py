@@ -141,10 +141,14 @@ def delete_session_token_by_token_hash(db, token_hash) -> Row | None:
     return db.execute(text(sql), {"token_hash": token_hash}).one_or_none()
 
 
-def extend_session_expiry(db, token_hash) -> None:
+def extend_session_expiry(db, user_id, token_hash) -> None:
 
+    params = {
+        "user_id": user_id,
+        "token_hash": token_hash
+    }
     sql = load_sql("extend_session_expiry", "auth")
-    db.execute(text(sql), {"token_hash": token_hash})
+    db.execute(text(sql), params)
 
 
 def get_user_password_by_user_id(db, user_id) -> Row | None:
@@ -250,7 +254,7 @@ def get_tutorial_views(db, start_date, end_date) -> list[dict]:
         "end_date": end_date
     }
     sql = load_sql("get_tutorial_views", "admin")
-    return db.execute(text(sql), params).mappings()
+    return db.execute(text(sql), params).mappings().all()
 
 
 def get_event_count_by_type(db, start_date, end_date) -> list[dict]:

@@ -41,6 +41,7 @@ async def upload_file(file: UploadFile = File(...), source: Literal["libcal", "n
 
     try:
         session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         file_id = await services.upload_file_service(db, file, source, session.user_id)
         
         if source == 'niche':
@@ -99,7 +100,8 @@ def top_tutorials(limit: int = 10, start_date: date | None = None, end_date: dat
     
     # A date must be in the format: 2026-02-15
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
 
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
@@ -122,8 +124,8 @@ def top_tutorials(limit: int = 10, start_date: date | None = None, end_date: dat
 def tutorial_views_monthly(start_date: date, end_date: date, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
-
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
         
@@ -145,7 +147,8 @@ def tutorial_views_monthly(start_date: date, end_date: date, db=Depends(get_db),
 def get_total_events(start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
@@ -168,7 +171,8 @@ def get_total_events(start_date: date | None = None, end_date: date | None = Non
 def get_top_items(limit: int = 10, start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
 
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
@@ -191,7 +195,8 @@ def get_top_items(limit: int = 10, start_date: date | None = None, end_date: dat
 def top_organizations(limit: int = 5, start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
             end_date = end_date + timedelta(days=1)
@@ -216,7 +221,8 @@ def top_organizations(limit: int = 5, start_date: date | None = None, end_date: 
 def delete(source: Literal["libcal", "niche", "myturn"], page: int, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         return services.file_data_dto(db, source, page)
     
     except auth.InvalidToken:
@@ -239,7 +245,8 @@ def delete(source: Literal["libcal", "niche", "myturn"], page: int, db=Depends(g
 def delete(payload: schemas.DeleteFilesRequest, db=Depends(get_db), token=Depends(session_token)):
 
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         files = payload.files
         services.delete_files(db, files)
 
@@ -258,7 +265,8 @@ def delete(payload: schemas.DeleteFilesRequest, db=Depends(get_db), token=Depend
 def get_free_items(db=Depends(get_db), token=Depends(session_token)):
     
     try:
-        services.authenticate_token(db, token)
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         return services.free_items(db)
 
     except auth.InvalidToken:
