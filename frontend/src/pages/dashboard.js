@@ -38,10 +38,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  let isLoading = false;
+
   // =====================
   // LOAD DASHBOARD
   // =====================
   async function loadDashboard() {
+    if (isLoading) return;
+    isLoading = true;
+
     try {
       const { start, end } = getLast30DaysRange();
 
@@ -57,18 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
         events?.total || 0;
 
       const items = await fetchTopItems(5);
-      const itemsData = items?.data || [];
+      //const itemsData = items?.data || [];
       document.getElementById("itemsMetric").textContent =
         itemsData[0]?.item_name || "—";
 
       const orgs = await fetchTopOrganizations(5);
-      const orgsData = orgs?.data || [];
+      //const orgsData = orgs?.data || [];
       document.getElementById("orgsMetric").textContent =
-        orgsData[0]?.organization_name || "—";
+        orgs?.data?.[0]?.organization_name || "—";
 
     } catch (err) {
       console.error(err);
       showToast("Failed to load dashboard");
+    } finally {
+      isLoading = false;
     }
   }
 
