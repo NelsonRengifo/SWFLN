@@ -323,6 +323,12 @@ def get_username(db, email) -> str:
 
 
 
+def normalize_day_of_date(raw_date: date) -> date:
+
+    return raw_date.replace(day=1)
+
+
+
 #-------------------------------------------------------
 #               ADMIN ROUTE LOGIC
 #-------------------------------------------------------
