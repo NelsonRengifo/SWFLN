@@ -2,9 +2,12 @@
 # EXTERNAL IMPORTS
 # ======================================================
 
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# NEW: serve the frontend folder through FastAPI
+from fastapi.staticfiles import StaticFiles
+
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -23,10 +26,10 @@ load_dotenv(env_path, override=True)
 # INTERNAL IMPORTS
 # ======================================================
 
-
-from backend.routes.auth  import auth_route
+from backend.routes.auth import auth_route
 from backend.routes.admin import admin_route
 from backend.core.logging_config import setup_logging
+
 
 # ======================================================
 # APP
@@ -38,11 +41,19 @@ app = FastAPI()
 origins = os.getenv("CORS_ORIGINS").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+# NEW: project root folder
+project_root = backend.parent
+
+# NEW: path to the frontend folder
+frontend_path = project_root / "frontend"
+
+# NEW: make FastAPI serve everything inside /frontend
+app.mount("/frontend", StaticFiles(directory=frontend_path), name="frontend")
+
 
 # ======================================================
 # ROUTE REGISTRATION
 # ======================================================
-
 
 app.include_router(auth_route)
 app.include_router(admin_route)
