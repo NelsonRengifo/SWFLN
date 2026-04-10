@@ -1,3 +1,4 @@
+<!--Reports Page-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
   <title>Reports</title>
 
   <link rel="stylesheet" href="/frontend/styles/base.css" />
-  <link rel="stylesheet" href="/frontend/styles/dashboard.css" />
+  <link rel="stylesheet" href="/frontend/styles/forms.css" />
 </head>
 
 <body>
@@ -29,6 +30,16 @@
 
     <main class="main-content">
 
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-type="tutorials">Top Tutorials</button>
+        <button class="tab" data-type="views">Tutorial Views</button>
+        <button class="tab" data-type="events">Event Counts</button>
+        <button class="tab" data-type="items">Top Items</button>
+        <button class="tab" data-type="orgs">Top Organizations</button>
+      </div>
+
+      <!-- FILTERS -->
       <section class="filters">
 
         <label>
@@ -50,6 +61,7 @@
 
       </section>
 
+      <!-- RESULTS -->
       <section class="table-container">
         <div id="reportContent"></div>
       </section>
