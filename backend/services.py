@@ -762,20 +762,22 @@ def run_niche_transform_logic(db, source) -> None:
                         continue
 
                     else:
-                        metric_date = parser.parse(header).replace(day=31, year=normalized_year).date()
+                        metric_date = parser.parse(header).replace(day=1, year=normalized_year).date()
                         total_views = value
 
                 if (tutorial_id, metric_date) in seen:
                     continue
                     
                 seen.add((tutorial_id, metric_date))
-
+                
                 tutorial_metrics.append({
                     "tutorial_id": tutorial_id,
                     "metric_date": metric_date,
                     "total_views": total_views,
                     "uploaded_file_id": file_id
                 })
+
+                logger.debug(tutorial_metrics)
 
             # batch insert tutorial_metric
             if tutorial_metrics:
