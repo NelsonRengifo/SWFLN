@@ -111,14 +111,14 @@ CREATE TABLE IF NOT EXISTS events (
     end_time TIME NOT NULL,
     registrant_name TEXT NOT NULL,
     organization TEXT,
-    tag TEXT NOT NULL,
+    tag TEXT,
     event_title TEXT NOT NULL,
     event_type TEXT NOT NULL,
     total_confirmed_registrants INTEGER NOT NULL,
     total_number_registrants INTEGER NOT NULL,
     uploaded_file_id UUID NOT NULL,
     UNIQUE(registrant_name, start_date, end_date, event_title, start_time, end_time),
-    CHECK (tag in ('LSTA', 'LCG', 'local')),
+    CHECK (tag in ('LSTA', 'LCG', 'local', 'Local, LSTA', 'Local, LCG')),
     CHECK (event_type in ('in-person', 'online', 'hybrid')),
     FOREIGN KEY (uploaded_file_id) REFERENCES uploaded_files(uploaded_file_id) ON DELETE CASCADE
 );
