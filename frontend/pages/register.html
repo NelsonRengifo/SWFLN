@@ -1,3 +1,4 @@
+<!--Registration Page-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,28 +30,30 @@
 
     <main class="main-content">
 
-      <div class="form-container">
+      <div class="auth-container">
+        <div class="auth-card">
 
-        <h2>Create New User</h2>
+          <h2 class="auth-title">Create User</h2>
 
-        <form id="registerForm">
+          <form id="registerForm" class="auth-form">
 
-          <input type="text" id="username" placeholder="Username" required />
-          <input type="email" id="email" placeholder="Email" required />
-          <input type="text" id="firstName" placeholder="First Name" required />
-          <input type="text" id="lastName" placeholder="Last Name" required />
-          <input type="password" id="password" placeholder="Password" required />
+            <input type="text" id="firstName" placeholder="First Name" required />
+            <input type="text" id="lastName" placeholder="Last Name" required />
+            <input type="text" id="username" placeholder="Username" required />
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Password (More Than 8 Characters)" required />
 
-          <select id="role" required>
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="super admin">Super Admin</option>
-          </select>
+            <select id="role" required>
+              <option value="">Select Role</option>
+              <option value="admin">Admin</option>
+              <option value="super admin">Super Admin</option>
+            </select>
 
-          <button type="submit">Create User</button>
+            <button type="submit" class="primary-btn">Create User</button>
 
-        </form>
-        
+          </form>
+
+        </div>
       </div>
 
     </main>

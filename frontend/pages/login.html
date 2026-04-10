@@ -14,35 +14,35 @@
 
   <script type="module" src="/frontend/src/pages/login.js" defer></script>
 </head>
-<body>
+<body class="auth-body">
 
-<main class="login-container">
-  <h1>SWFLN Reporting Dashboard</h1>
+<div class="auth-container">
 
-  <form id="loginForm" class="login-form">
-    <label>
-      Username
-      <input type="text" id="username" required />
-    </label>
+  <div class="auth-card">
+    <h1 class="auth-title">SWFLN Dashboard</h1>
+    <p class="auth-subtitle">Sign in to your account</p>
 
-    <label>
-      Password
-      <input type="password" id="password" required />
-    </label>
+    <form id="loginForm" class="auth-form">
 
-    <button type="submit">Login</button>
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Enter username" required />
 
-    <div class="form-link">
-      <a href="./forgot-password.html">Forgot Password?</a>
-    </div>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password" required />
 
-    <p class="auth-link">
-      <a href="#" id="forgotUsernameLink">Forgot Username?</a>
-    </p>
+      <button type="submit" class="primary-btn">Login</button>
 
-    <p id="errorMsg" class="error hidden">Incorrect Password</p>
-  </form>
-</main>
+      <div class="auth-links">
+        <a href="./forgot-password.html">Forgot Password?</a>
+        <a href="#" id="forgotUsernameLink">Forgot Username?</a>
+      </div>
+
+      <p id="errorMsg" class="error hidden">Invalid login</p>
+
+    </form>
+  </div>
+
+</div>
 
 </body>
 </html>
