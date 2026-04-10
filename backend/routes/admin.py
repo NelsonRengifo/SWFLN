@@ -128,6 +128,9 @@ def tutorial_views_monthly(start_date: date, end_date: date, db=Depends(get_db),
         services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
         if start_date and end_date:
             services.is_valid_date_range(start_date, end_date)
+
+        start_date = services.normalize_day_of_date(start_date)
+        end_date = services.normalize_day_of_date(end_date)
         
         return services.tutorial_views(db, start_date, end_date)
     
@@ -185,6 +188,7 @@ def get_top_items(limit: int = 10, start_date: date | None = None, end_date: dat
     
     except admin.InvalidDateRange:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date range")
+
 
 # ======================================================
 # TOP ORGANIZATIONS BASED ON AMOUNT OF LOANS
