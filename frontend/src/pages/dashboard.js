@@ -26,11 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   // DATE RANGE
   // =====================
-  function getLast30DaysRange() {
+  function getLast365DaysRange() {
     const today = new Date().toISOString().split("T")[0];
 
     const past = new Date();
-    past.setDate(past.getDate() - 30);
+    past.setDate(past.getDate() - 365);
 
     return {
       start: past.toISOString().split("T")[0],
@@ -48,21 +48,21 @@ document.addEventListener("DOMContentLoaded", () => {
     isLoading = true;
 
     try {
-      const { start, end } = getLast30DaysRange();
+      const { start, end } = getLast365DaysRange();
 
-      const tutorials = await fetchTopTutorials(10, start, end);
+      const tutorials = await fetchTopTutorials(10);
       renderTable(tutorials?.data || tutorials);
 
       const views = await fetchTutorialViews(start, end);
       document.getElementById("viewsMetric").textContent =
         views?.total || 0;
 
-      const events = await fetchTotalEvents(start, end);
+      const events = await fetchTotalEvents();
       document.getElementById("eventsMetric").textContent =
         events?.total || 0;
 
       const items = await fetchTopItems(5);
-      //const itemsData = items?.data || [];
+      const itemsData = items?.data || [];
       document.getElementById("itemsMetric").textContent =
         itemsData[0]?.item_name || "—";
 

@@ -47,3 +47,69 @@ button:hover {
 .form-link a:hover {
   text-decoration: underline;
 }
+
+.auth-body {
+  background: #f1f5f9;
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  width: 380px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.auth-title {
+  margin: 1;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form input,
+.auth-form select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+}
+
+.primary-btn {
+  background: #3b82f6;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.primary-btn:hover {
+  background: #2563eb;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
