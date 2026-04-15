@@ -28,50 +28,39 @@
   <div class="app-content">
 
     <!-- ===================== -->
-    <!-- HEADER -->
-    <!-- ===================== -->
-    <header class="app-header">
-      <h1>SWFLN Admin Dashboard</h1>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </header>
-
-    <!-- ===================== -->
     <!-- MAIN CONTENT -->
     <!-- ===================== -->
     <main class="main-content">
 
-      <!-- METRICS -->
-      <section class="metrics-grid">
+      <div class="dashboard-grid">
 
-        <div class="metric-card">
-          <p>Tutorial Views</p>
-          <h3 id="viewsMetric">--</h3>
+        <div class="section-card">
+          <div class="section-header">Top Tutorials</div>
+          <div id="tutorialsTable"></div>
         </div>
 
-        <div class="metric-card">
-          <p>Event Counts</p>
-          <h3 id="eventsMetric">--</h3>
+        <div class="section-card">
+          <div class="section-header">Top Items</div>
+          <div id="itemsTable"></div>
         </div>
 
-        <div class="metric-card">
-          <p>Top Item</p>
-          <h3 id="itemsMetric">--</h3>
+        <div class="section-card">
+          <div class="section-header">Top Organizations</div>
+          <div id="orgsTable"></div>
         </div>
 
-        <div class="metric-card">
-          <p>Top Organization</p>
-          <h3 id="orgsMetric">--</h3>
+        <div class="section-card">
+          <div class="section-header">Tutorial Views (365 Days)</div>
+          <div id="viewsTable"></div>
         </div>
 
-      </section>
-
-      <!-- TOP TUTORIALS TABLE -->
-      <section class="report-section">
-        <h2>Top Tutorials</h2>
-        <div id="reportContent">
-          <p>Loading...</p>
+        <div class="section-card full-width">
+          <div class="section-header">Total Events</div>
+          <div id="eventsTable"></div>
         </div>
-      </section>
+
+      </div>
+
     </main>
   </div>
 </div>

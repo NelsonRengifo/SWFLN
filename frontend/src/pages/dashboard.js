@@ -10,25 +10,15 @@ import {
   fetchTopOrganizations
 } from "../api/reports.js";
 
-// =====================
-// INIT
-// =====================
 requireAuth();
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSidebar();
-  // =====================
-  // ELEMENTS
-  // =====================
-  const logoutBtn = document.getElementById("logoutBtn");
-  const reportContent = document.getElementById("reportContent");
 
-  // =====================
-  // DATE RANGE
-  // =====================
+  const logoutBtn = document.getElementById("logoutBtn");
+
   function getLast365DaysRange() {
     const today = new Date().toISOString().split("T")[0];
-
     const past = new Date();
     past.setDate(past.getDate() - 365);
 
@@ -38,62 +28,43 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  let isLoading = false;
-
-  // =====================
-  // LOAD DASHBOARD
-  // =====================
   async function loadDashboard() {
-    if (isLoading) return;
-    isLoading = true;
-
     try {
       const { start, end } = getLast365DaysRange();
 
-      const tutorials = await fetchTopTutorials(10);
-      renderTable(tutorials?.data || tutorials);
-
-      const views = await fetchTutorialViews(start, end);
-      document.getElementById("viewsMetric").textContent =
-        views?.total || 0;
-
-      const events = await fetchTotalEvents();
-      document.getElementById("eventsMetric").textContent =
-        events?.total || 0;
+      const tutorials = await fetchTopTutorials(5);
+      renderTable("tutorialsTable", tutorials?.data || tutorials);
 
       const items = await fetchTopItems(5);
-      const itemsData = items?.data || [];
-      document.getElementById("itemsMetric").textContent =
-        itemsData[0]?.item_name || "—";
+      renderTable("itemsTable", items?.data || items);
 
       const orgs = await fetchTopOrganizations(5);
-      //const orgsData = orgs?.data || [];
-      document.getElementById("orgsMetric").textContent =
-        orgs?.data?.[0]?.organization_name || "—";
+      renderTable("orgsTable", orgs?.data || orgs);
+
+      const views = await fetchTutorialViews(start, end);
+      renderSingleValue("viewsTable", views?.total, "Total Views");
+
+      const events = await fetchTotalEvents();
+      renderSingleValue("eventsTable", events?.total, "Total Events");
 
     } catch (err) {
       console.error(err);
       showToast("Failed to load dashboard");
-    } finally {
-      isLoading = false;
     }
   }
 
-  loadDashboard();
+  function renderTable(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-  // =====================
-  // TABLE RENDER
-  // =====================
-  function renderTable(data) {
-    if (!reportContent) return;
     if (!data || data.length === 0) {
-      reportContent.innerHTML = "<p>No data available.</p>";
+      container.innerHTML = "<p>No data available</p>";
       return;
     }
 
     const headers = Object.keys(data[0]);
 
-    reportContent.innerHTML = `
+    container.innerHTML = `
       <table>
         <thead>
           <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
@@ -109,11 +80,25 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // =====================
-  // LOGOUT
-  // =====================
+  function renderSingleValue(containerId, value, label) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>${label}</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>${value ?? 0}</td></tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  loadDashboard();
+
   if (logoutBtn) {
     logoutBtn.addEventListener("click", logout);
   }
-
 });
