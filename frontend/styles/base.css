@@ -15,122 +15,111 @@ body {
 }
 
 /* ================================
-   TYPOGRAPHY
-================================ */
-h1 {
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-/* ================================
    LAYOUT
 ================================ */
 .app-layout {
   display: flex;
+  flex-direction: column; /* 🔥 KEY CHANGE */
 }
 
 .app-content {
-  margin-left: 70px;
   width: 100%;
-  padding-left: 10px;
 }
 
 /* ================================
-   SIDEBAR
+   TOP NAVBAR
 ================================ */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 80px;
-  height: 100%;
+.top-nav {
+  width: 100%;
   background: #0f172a;
+  color: white;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 20px 0;
+  justify-content: space-between;
+
+  padding: 18px 40px;
+  min-height: 70px; 
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.3rem; /* bigger logo */
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
   gap: 20px;
 }
 
-.icon svg {
-  width: 20px;
-  height: 20px;
+.nav-links a,
+.dropbtn {
+  font-size: 1rem;   /* bigger text */
+  padding: 6px 8px;
 }
 
-.sidebar-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94a3b8;
-  border-radius: 10px;
-  transition: all 0.2s ease;
-}
-
-.sidebar-icon:hover {
-  background: #1e293b;
+.nav-links a:hover,
+.nav-links a.active {
   color: white;
 }
 
-.sidebar-icon.active {
-  background: #3b82f6;
+/* ================================
+   DROPDOWN
+================================ */
+.dropdown {
+  position: relative;
+}
+
+.dropbtn {
+  background: none;
+  border: none;
+  color: #cbd5f5;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.dropbtn:hover {
   color: white;
 }
 
-/* tooltip */
-.sidebar-icon::after {
-  content: attr(data-label);
+.dropdown-content {
+  display: none;
   position: absolute;
-  left: 70px;
-  background: #111;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: 0.2s;
-  white-space: nowrap;
+  top: 30px;
+  background: white;
+  color: black;
+  min-width: 150px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-.sidebar-icon:hover::after {
-  opacity: 1;
+.dropdown-content a {
+  display: block;
+  padding: 10px;
+  color: #0f172a;
+}
+
+.dropdown-content a:hover {
+  background: #f1f5f9;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
 }
 
 /* ================================
    HEADER
 ================================ */
 .app-header {
-  padding: 24px 32px;
-  background: rgb(255, 255, 255);
-  border-bottom: 1px solid #e2e8f0;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: none;
 }
 
 /* ================================
-   BUTTONS
+   MAIN CONTENT
 ================================ */
-button {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:hover {
-  background: #2563eb;
+.main-content {
+  padding: 32px;
 }
 
 /* ================================
@@ -140,28 +129,21 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
 }
 
 .table-container {
-  padding: 2rem 2rem 2rem 1rem;
-  margin-left: 7px;
-}
-
-thead {
-  background: #f1f5f9;
+  margin-bottom: 30px;
 }
 
 th {
   text-align: left;
-  padding: 12px 16px;
-  font-size: 0.85rem;
-  color: #64748b;
+  padding: 10px 10px;
+  font-size: 0.8rem;
+  color: black;
 }
 
 td {
-  padding: 14px 16px;
+  padding: 12px;
   font-size: 0.9rem;
 }
 
@@ -174,40 +156,29 @@ tbody tr:hover {
 }
 
 /* ================================
-   UTIL
+   BUTTONS
 ================================ */
-.main-content {
-  padding: 32px;
+button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
 }
 
+button:hover {
+  background: #2563eb;
+}
+
+/* ================================
+   UTIL
+================================ */
 .hidden {
   display: none;
 }
 
 .error {
   color: red;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin: 20px;
-}
-
-.tab {
-  padding: 10px 16px;
-  border: none;
-  background: #e2e8f0;
-  cursor: pointer;
-  border-radius: 6px;
-  font-weight: 500;
-}
-
-.tab.active {
-  background: #3b82f6;
-  color: white;
-}
-
-.tab:hover {
-  background: #cbd5f5;
 }

@@ -1,52 +1,36 @@
 /* dashboard.css */
 
 /* ================================
-   METRICS GRID
+   DASHBOARD TABLE SECTIONS
 ================================ */
-.metrics-grid {
+.dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
 }
 
-/* ================================
-   METRIC CARDS
-================================ */
-.metric-card {
+.full-width {
+  grid-column: span 2;
+}
+
+.section-card {
   background: white;
-  padding: 20px;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
 }
 
-.metric-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-}
-
-.metric-card p {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.metric-card h3 {
-  font-size: 2rem;
-  margin: 10px 0 0;
+.section-header {
+  background: #1e3a5f;
+  color: white;
+  padding: 14px 18px;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
-/* ================================
-   REPORT SECTION
-================================ */
-.report-section {
-  margin-top: 30px;
-}
-
-/* ================================
-   TABLE WRAPPER
-================================ */
-#reportContent {
-  margin-top: 10px;
+.section-card > div:last-child {
+  padding: 10px 16px 16px 16px;
 }
