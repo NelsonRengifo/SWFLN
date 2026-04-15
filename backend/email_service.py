@@ -66,7 +66,7 @@ def send_username_email(recipient_email, username) -> None:
     ms = MailerSendClient()
 
     email = (EmailBuilder()
-         .from_email("nrengifo2468@eagle.fgcu.edu", "Nelson Rengifo")
+         .from_email("noreply@test-r9084zv6q6jgw63d.mlsender.net", "Nelson Rengifo")
          .to_many([{"email": recipient_email}])
          .subject("Username recovery")
          .html(f'<p>Your username is: <strong>{username}</strong></p>')
