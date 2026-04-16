@@ -39,34 +39,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     reportContent.innerHTML = "<p>Loading...</p>";
 
+    function setSectionTitle(title) {
+      reportContent.innerHTML = `<h2 style="margin-bottom:10px;">${title}</h2>`;
+    }
+
     try {
       let data;
 
-      switch (activeTab) {
-        case "tutorials":
-          data = await fetchTopTutorials(limit, startDate, endDate);
-          renderTable(data?.data || data);
-          break;
+    switch (activeTab) {
+      case "tutorials":
+        setSectionTitle("Top Tutorials");
+        data = await fetchTopTutorials(limit, startDate, endDate);
+        renderTable(data?.data || data);
+        break;
 
-        case "views":
-          data = await fetchTutorialViews(startDate, endDate);
-          renderSingleMetric(data);
-          break;
+      case "views":
+        data = await fetchTutorialViews(startDate, endDate);
+        renderViewsTable(data);
+        break;
 
-        case "events":
-          data = await fetchTotalEvents(startDate, endDate);
-          renderSingleMetric(data);
-          break;
+      case "events":
+        data = await fetchTotalEvents(startDate, endDate);
+        renderEventsTable(data);
+        break;
 
-        case "items":
-          data = await fetchTopItems(limit, startDate, endDate);
-          renderTable(data?.data || data);
-          break;
+      case "items":
+        setSectionTitle("Top Items");
+        data = await fetchTopItems(limit, startDate, endDate);
+        renderTable(data?.data || data);
+        break;
 
-        case "orgs":
-          data = await fetchTopOrganizations(limit, startDate, endDate);
-          renderTable(data?.data || data);
-          break;
+      case "orgs":
+        setSectionTitle("Top Organizations");
+        data = await fetchTopOrganizations(limit, startDate, endDate);
+        renderTable(data?.data || data);
+        break;
 
         default:
           reportContent.innerHTML = "<p>Invalid report type</p>";
@@ -104,11 +111,83 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function renderEventsTable(response) {
+    if (!response?.data?.length) {
+      reportContent.innerHTML = "<p>No data found</p>";
+      return;
+    }
+
+    reportContent.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Event Type</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${response.data.map(row => `
+            <tr>
+              <td>${row.event_type}</td>
+              <td>${row.total}</td>
+            </tr>
+          `).join("")}
+
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>${response.total}</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderViewsTable(response) {
+    if (!response?.data?.length) {
+      reportContent.innerHTML = "<p>No data found</p>";
+      return;
+    }
+
+    reportContent.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${response.data.map(row => `
+            <tr>
+              <td>${formatMonth(row.date)}</td>
+              <td>${row.views}</td>
+            </tr>
+          `).join("")}
+
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>${response.total}</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  function formatMonth(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleString("default", {
+      month: "short",
+      year: "numeric"
+    });
+  }
+
   function renderSingleMetric(data) {
     reportContent.innerHTML = `
-      <div class="metric-card">
-        <h3>Total</h3>
-        <p>${data?.total ?? 0}</p>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <p>Total</p>
+          <h3>${data?.total ?? 0}</h3>
+        </div>
       </div>
     `;
   }

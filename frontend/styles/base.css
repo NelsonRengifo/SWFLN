@@ -1,13 +1,27 @@
 /* base.css */
 
 /* ================================
+   DESIGN SYSTEM
+================================ */
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --header: #0f172a;
+}
+
+/* ================================
    GLOBAL
 ================================ */
 body {
   font-family: 'Inter', Arial, sans-serif;
   margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--bg);
+  color: var(--text);
 }
 
 * {
@@ -19,31 +33,34 @@ body {
 ================================ */
 .app-layout {
   display: flex;
-  flex-direction: column; /* 🔥 KEY CHANGE */
+  flex-direction: column;
 }
 
 .app-content {
   width: 100%;
 }
 
+.main-content {
+  padding: 32px;
+}
+
 /* ================================
-   TOP NAVBAR
+   NAVBAR
 ================================ */
 .top-nav {
   width: 100%;
-  background: #0f172a;
+  background: var(--header);
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 18px 40px;
-  min-height: 70px; 
+  min-height: 70px;
 }
 
 .logo {
   font-weight: 700;
-  font-size: 1.3rem; /* bigger logo */
+  font-size: 1.3rem;
 }
 
 .nav-links {
@@ -54,12 +71,15 @@ body {
 
 .nav-links a,
 .dropbtn {
-  font-size: 1rem;   /* bigger text */
+  font-size: 1rem;
   padding: 6px 8px;
+  color: #cbd5f5;
+  text-decoration: none;
 }
 
 .nav-links a:hover,
-.nav-links a.active {
+.nav-links a.active,
+.dropbtn:hover {
   color: white;
 }
 
@@ -73,35 +93,28 @@ body {
 .dropbtn {
   background: none;
   border: none;
-  color: #cbd5f5;
   cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.dropbtn:hover {
-  color: white;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  top: 30px;
+  top: 36px;
   background: white;
-  color: black;
-  min-width: 150px;
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  overflow: hidden;
+  min-width: 160px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
 .dropdown-content a {
   display: block;
-  padding: 10px;
-  color: #0f172a;
+  padding: 10px 14px;
+  color: var(--text);
 }
 
 .dropdown-content a:hover {
-  background: #f1f5f9;
+  background: var(--bg);
 }
 
 .dropdown:hover .dropdown-content {
@@ -109,17 +122,14 @@ body {
 }
 
 /* ================================
-   HEADER
+   CARD SYSTEM
 ================================ */
-.app-header {
-  display: none;
-}
-
-/* ================================
-   MAIN CONTENT
-================================ */
-.main-content {
-  padding: 32px;
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
 }
 
 /* ================================
@@ -128,57 +138,132 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--card);
 }
 
-.table-container {
-  margin-bottom: 30px;
+thead {
+  background: #f1f5f9;
 }
 
 th {
   text-align: left;
-  padding: 10px 10px;
+  padding: 12px 14px;
   font-size: 0.8rem;
-  color: black;
+  color: var(--muted);
 }
 
 td {
-  padding: 12px;
+  padding: 12px 14px;
   font-size: 0.9rem;
 }
 
 tbody tr {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
 }
 
 tbody tr:hover {
   background: #f8fafc;
 }
 
+/* TOTAL ROW */
+.total-row {
+  font-weight: 600;
+  background: #f1f5f9;
+}
+
 /* ================================
    BUTTONS
 ================================ */
 button {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
-  padding: 8px 18px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 button:hover {
-  background: #2563eb;
+  background: var(--primary-hover);
+}
+
+/* ================================
+   TABS
+================================ */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: #475569;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.tab:hover {
+  background: #cbd5f5;
+}
+
+.tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* ================================
+   FILTERS
+================================ */
+.filters {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.filters input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
 }
 
 /* ================================
    UTIL
 ================================ */
-.hidden {
-  display: none;
+.hidden { display: none; }
+.error { color: red; }
+.page-title { margin-bottom: 20px; }
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.error {
-  color: red;
+/* BUTTON GROUP */
+.card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* DANGER BUTTON */
+.danger-btn {
+  background: #ef4444;
+}
+
+.danger-btn:hover {
+  background: #dc2626;
 }

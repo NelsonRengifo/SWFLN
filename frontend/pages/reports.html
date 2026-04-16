@@ -9,6 +9,7 @@
   <meta charset="UTF-8" />
   <title>Reports</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/forms.css" />
 </head>
@@ -25,39 +26,46 @@
 
     <main class="main-content">
 
+      <!-- PAGE TITLE -->
+      <h1 class="page-title">Reports</h1>
+
       <!-- TABS -->
-      <div class="tabs">
-        <button class="tab active" data-type="tutorials">Top Tutorials</button>
-        <button class="tab" data-type="views">Tutorial Views</button>
-        <button class="tab" data-type="events">Event Counts</button>
-        <button class="tab" data-type="items">Top Items</button>
-        <button class="tab" data-type="orgs">Top Organizations</button>
+      <div class="tabs-container">
+        <div class="tabs">
+          <button class="tab active" data-type="tutorials">Top Tutorials</button>
+          <button class="tab" data-type="views">Tutorial Views</button>
+          <button class="tab" data-type="events">Event Counts</button>
+          <button class="tab" data-type="items">Top Items</button>
+          <button class="tab" data-type="orgs">Top Organizations</button>
+        </div>
       </div>
 
-      <!-- FILTERS -->
-      <section class="filters">
+      <!-- FILTER CARD -->
+      <section class="card filters-card">
 
-        <label>
-          Limit
-          <input type="number" id="limit" value="10" />
-        </label>
+        <div class="filters">
+          <label>
+            Limit
+            <input type="number" id="limit" value="10" />
+          </label>
 
-        <label>
-          Start Date
-          <input type="date" id="startDate" />
-        </label>
+          <label>
+            Start Date
+            <input type="date" id="startDate" />
+          </label>
 
-        <label>
-          End Date
-          <input type="date" id="endDate" />
-        </label>
+          <label>
+            End Date
+            <input type="date" id="endDate" />
+          </label>
 
-        <button id="loadReportBtn">Load Report</button>
+          <button id="loadReportBtn">Load Report</button>
+        </div>
 
       </section>
 
       <!-- RESULTS -->
-      <section class="table-container">
+      <section class="card table-card">
         <div id="reportContent"></div>
       </section>
 
@@ -67,7 +75,7 @@
   
 </div>
 
-<script type="module" src="../src/pages/reports.js"></script>
+<script type="module" src="/frontend/src/pages/reports.js"></script>
 
 </body>
 </html>
