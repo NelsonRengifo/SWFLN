@@ -36,7 +36,7 @@ from backend.exceptions import auth
 
 PROTOCOL = "http://"                 # use https once live on service provider
 DOMAIN = "127.0.0.1:8000"            # This domain should be the front-end domain
-ROUTE = "/auth/reset-password"       # this route should be the front-end UI landing page
+ROUTE = "/frontend/pages/reset-password.html"       # this route should be the front-end UI landing page
 
 
 def send_password_reset_link(recipient_email, token) -> None:
