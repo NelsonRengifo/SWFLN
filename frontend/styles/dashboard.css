@@ -1,7 +1,7 @@
 /* dashboard.css */
 
 /* ================================
-   DASHBOARD TABLE SECTIONS
+   DASHBOARD GRID
 ================================ */
 .dashboard-grid {
   display: grid;
@@ -13,12 +13,14 @@
   grid-column: span 2;
 }
 
+/* ================================
+   SECTION CARDS
+================================ */
 .section-card {
   background: white;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
 }
@@ -32,5 +34,5 @@
 }
 
 .section-card > div:last-child {
-  padding: 10px 16px 16px 16px;
+  padding: 10px 16px 16px;
 }

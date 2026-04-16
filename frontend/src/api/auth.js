@@ -2,28 +2,26 @@ import { setToken, clearToken } from "../utils/storage.js";
 import { apiFetch } from "./fetch.js";
 import { showToast } from "../utils/toast.js";
 
-// --------------------
 // LOGIN
-// --------------------
 export async function login(username, password) {
-
   const data = await apiFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password })
   });
+
+  if (data && data.detail) {
+    throw new Error(data.detail); 
+  }
 
   if (!data || !data.token) {
     throw new Error("Invalid credentials");
   }
 
   setToken(data.token);
-
   return data;
 }
 
-// --------------------
 // LOGOUT
-// --------------------
 export async function logout() {
 
   try {
@@ -50,9 +48,7 @@ export async function logout() {
 
 }
 
-// --------------------
 // FORGOT PASSWORD
-// --------------------
 export async function forgotPassword(email) {
   return apiFetch("/auth/forgot-password", {
     method: "POST",
@@ -60,9 +56,7 @@ export async function forgotPassword(email) {
   });
 }
 
-// --------------------
 // RESET PASSWORD
-// --------------------
 export async function resetPassword(reset_token, new_password, confirm_password) {
   return apiFetch("/auth/reset-password", {
     method: "POST",
@@ -74,9 +68,7 @@ export async function resetPassword(reset_token, new_password, confirm_password)
   });
 }
 
-// --------------------
 // UPDATE PASSWORD (Logged In)
-// --------------------
 export async function updatePassword(current_password, new_password, confirm_password) {
   return apiFetch("/auth/update/password", {
     method: "POST",
@@ -88,9 +80,7 @@ export async function updatePassword(current_password, new_password, confirm_pas
   });
 }
 
-// ============================
 // UPDATE USERNAME
-// ============================
 export async function updateUsername(new_username, confirm_username) {
   return apiFetch("/auth/update/username", {
     method: "POST",
@@ -101,9 +91,7 @@ export async function updateUsername(new_username, confirm_username) {
   });
 }
 
-// ============================
 // FORGOT USERNAME
-// ============================
 export async function forgotUsername(email) {
   return apiFetch("/auth/forgot-username", {
     method: "POST",
@@ -111,9 +99,7 @@ export async function forgotUsername(email) {
   });
 }
 
-// ============================
 // REGISTER USER (ADMIN)
-// ============================
 export async function registerUser(payload) {
   return apiFetch("/auth/register", {
     method: "POST",

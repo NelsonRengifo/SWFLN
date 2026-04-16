@@ -3,7 +3,6 @@
 .upload-page {
   display: flex;
   justify-content: center;
-  align-items: center;
   margin-top: 80px;
 }
 
@@ -11,22 +10,22 @@
   background: white;
   padding: 30px;
   border-radius: 12px;
-  width: 350px;
+  width: 360px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.table-card {
+  max-width: 1100px;
+  margin: 40px auto;
 }
 
 .upload-card input {
   margin: 15px 0;
 }
 
-.upload-card button {
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
 #statusMsg {
   margin-top: 15px;
   font-size: 14px;
-  color: #555;
+  color: #64748b;
 }

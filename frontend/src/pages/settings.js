@@ -14,9 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (passwordBtn) {
     passwordBtn.onclick = async () => {
-
       const current_password = document.getElementById("currentPassword").value;
       const new_password = document.getElementById("newPassword").value;
+
+      if (!current_password || !new_password) {
+        return showToast("Please fill all fields");
+      }
+
+      if (current_password === new_password) {
+        return showToast("New password must be different");
+      }
 
       try {
         await apiFetch("/auth/update/password", {
@@ -26,8 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showToast("Password updated");
 
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+
       } catch (err) {
-        showToast(err.message);
+        showToast(err.message || err.detail || "Failed to update password");
       }
     };
   }
@@ -39,8 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (usernameBtn) {
     usernameBtn.onclick = async () => {
-
       const new_username = document.getElementById("newUsername").value;
+
+      if (!new_username) {
+        return showToast("Username cannot be empty");
+      }
 
       try {
         await apiFetch("/auth/update/username", {
@@ -50,8 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showToast("Username updated");
 
+        document.getElementById("newUsername").value = "";
+
       } catch (err) {
-        showToast(err.message);
+        showToast(err.message || err.detail || "Failed to update username");
       }
     };
   }

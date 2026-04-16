@@ -9,6 +9,7 @@
   <meta charset="UTF-8" />
   <title>MyTurn Upload</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/upload.css" />
 
@@ -33,17 +34,21 @@
       </div>
     </main>
     
-    <section class="table-container">
-      <h2>Manage Uploaded Files</h2>
+    <section class="card table-card">
 
-      <div style="margin-bottom: 10px;">
-        <button id="loadFilesBtn">Load Files</button>
-        <button id="deleteBtn">Delete Selected</button>
+      <div class="card-header">
+        <h2>Manage Uploaded Files</h2>
+
+        <div class="card-actions">
+          <button id="loadFilesBtn">Load Files</button>
+          <button id="deleteBtn" class="danger-btn">Delete Selected</button>
+        </div>
       </div>
 
       <div id="filesTable">
         <p>No files loaded</p>
       </div>
+
     </section>
   </div>
 </div>

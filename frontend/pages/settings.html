@@ -9,6 +9,7 @@
   <meta charset="UTF-8" />
   <title>Settings</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/forms.css" />
   <script type="module" src="/frontend/src/pages/settings.js" defer></script>
@@ -24,26 +25,40 @@
 
     <main class="main-content">
 
-      <!-- UPDATE PASSWORD -->
-      <section>
-        <h2>Update Password</h2>
+      <h1 class="page-title">Settings</h1>
 
-        <input type="password" id="currentPassword" placeholder="Current Password" />
-        <input type="password" id="newPassword" placeholder="New Password" />
+      <div class="settings-grid">
 
-        <button id="updatePasswordBtn">Update Password</button>
-      </section>
+        <!-- PASSWORD CARD -->
+        <section class="card">
+          <h2>Update Password</h2>
 
-      <hr/>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currentPassword" />
+          </div>
 
-      <!-- UPDATE USERNAME -->
-      <section>
-        <h2>Update Username</h2>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword" />
+          </div>
 
-        <input type="text" id="newUsername" placeholder="New Username" />
+          <button id="updatePasswordBtn">Update Password</button>
+        </section>
 
-        <button id="updateUsernameBtn">Update Username</button>
-      </section>
+        <!-- USERNAME CARD -->
+        <section class="card">
+          <h2>Update Username</h2>
+
+          <div class="form-group">
+            <label>New Username</label>
+            <input type="text" id="newUsername" />
+          </div>
+
+          <button id="updateUsernameBtn">Update Username</button>
+        </section>
+
+      </div>
 
     </main>
   </div>

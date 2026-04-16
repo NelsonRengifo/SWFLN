@@ -1,19 +1,18 @@
 // Sidebar
+import { logout } from "../api/auth.js";
+
 export function loadSidebar() {
-  const container = document.getElementById("sidebar");
-  if (!container) return;
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
 
   const path = window.location.pathname;
-
   const isActive = (page) => path.includes(page) ? "active" : "";
 
-  container.innerHTML = `
+  sidebar.innerHTML = `
     <nav class="top-nav">
 
-      <div class="logo">SWFLN Reporting Dashboard</div>
-
-      <div class="nav-links">
-
+        <span class="logo">SWFLN Dashboard</span>
+        <div class="nav-links">
         <a href="dashboard.html" class="${isActive("dashboard")}">Dashboard</a>
         <a href="reports.html" class="${isActive("reports")}">Reports</a>
         <a href="settings.html" class="${isActive("settings")}">Settings</a>
@@ -27,11 +26,17 @@ export function loadSidebar() {
             <a href="upload-myturn.html">MyTurn</a>
           </div>
         </div>
-
       </div>
 
-      <button id="logoutBtn" class="logout-btn">Logout</button>
+      <div class="nav-right">
+        <button id="logoutBtn">Logout</button>
+      </div>
 
     </nav>
   `;
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
 }
