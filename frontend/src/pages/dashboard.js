@@ -14,20 +14,19 @@ requireAuth();
 document.addEventListener("DOMContentLoaded", () => {
   loadSidebar();
 
-  function getLast365DaysRange() {
-    const today = new Date().toISOString().split("T")[0];
-    const past = new Date();
-    past.setDate(past.getDate() - 365);
+  function getCurrentYearRange() {
+    const now = new Date();
+    const year = now.getFullYear();
 
     return {
-      start: past.toISOString().split("T")[0],
-      end: today
+      start: `${year}-01-01`,
+      end: `${year}-12-31`
     };
   }
 
   async function loadDashboard() {
     try {
-      const { start, end } = getLast365DaysRange();
+      const { start, end } = getCurrentYearRange();
 
       const tutorials = await fetchTopTutorials(5);
       renderTable("tutorialsTable", tutorials?.data || tutorials);
