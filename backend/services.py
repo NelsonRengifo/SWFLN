@@ -302,7 +302,8 @@ def reset_password(db, new_password, user_id) -> None:
 
     try:
         password_hash = hasher.hash(new_password)
-        queries.update_user_password_by_user_id(db, password_hash, user_id)
+        user_id = queries.update_user_password_by_user_id(db, password_hash, user_id)
+        logger.debug(user_id)
     except exceptions.HashingError as e:
         logger.exception(f"Failed hashing password for user: {user_id} | error: {e}")
         raise auth.FailedToHash
