@@ -60,6 +60,7 @@ export async function forgotPassword(email) {
 export async function resetPassword(reset_token, new_password, confirm_password) {
   return apiFetch("/auth/reset-password", {
     method: "POST",
+    headers: {Authorization: ""},
     body: JSON.stringify({
       reset_token,
       new_password,
