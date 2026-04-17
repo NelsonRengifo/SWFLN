@@ -179,22 +179,19 @@ def forgot_password(payload: schemas.ForgotPassword, db=Depends(get_db)):
 
 @auth_route.post("/reset-password", status_code=204)
 def reset_password(payload: schemas.ResetPassword, db=Depends(get_db)):
-
-    logger.debug(payload)
-
+    
     try:
         session = services.authenticate_reset_token(db, payload.reset_token)
         services.reset_password(db, payload.new_password, session.user_id)
-        logger.debug("FINISHED RESETING PASSWORD")
 
     except auth.InvalidToken:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="invalid or expired token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
 
     except auth.InvalidPassword:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="failed password requirements")
 
     except auth.PasswordsMatch:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="new password is the same as old password")
 
     except auth.FailedToHash:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Hashing error")
