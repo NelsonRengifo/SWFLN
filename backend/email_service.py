@@ -36,7 +36,7 @@ from backend.exceptions import auth
 
 PROTOCOL = "http://"                 # use https once live on service provider
 DOMAIN = "127.0.0.1:8000"            # This domain should be the front-end domain
-ROUTE = "/frontend/pages/reset-password.html"       # this route should be the front-end UI landing page
+ROUTE = "/frontend/pages/reset-password.html"
 
 
 def send_password_reset_link(recipient_email, token) -> None:
@@ -93,7 +93,7 @@ def send_password_reset_link(recipient_email, token) -> None:
 
             <tr>
               <td style="padding:0 32px 12px 32px; font-size:14px; line-height:22px; color:#666666;">
-                This link will expire in 30 minutes.
+                This link will expire in 15 minutes.
               </td>
             </tr>
 
