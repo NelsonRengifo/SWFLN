@@ -66,7 +66,6 @@ body {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 20px;
 }
 
 .nav-links a,
@@ -138,11 +137,11 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
 }
 
 .table-card {
-  max-width: 1100px;
+  width: 100%;
+  max-width: 100%;
   margin: 40px auto;
   overflow: hidden;
 }
@@ -156,12 +155,20 @@ th {
   padding: 12px 14px;
   font-size: 0.8rem;
   color: var(--muted);
+  white-space: normal;
 }
 
 td {
   padding: 12px 14px;
-  font-size: 0.9rem;
-  white-space: nowrap;
+  font-size: 0.8rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+td:first-child {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 tbody tr {
@@ -279,3 +286,4 @@ button:hover {
 .danger-btn:hover {
   background: #dc2626;
 }
+
