@@ -31,10 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const tutorials = await fetchTopTutorials(10);
       renderTable("tutorialsTable", tutorials?.data || tutorials);
 
-      const items = await fetchTopItems(5);
+      const items = await fetchTopItems(10);
       renderTable("itemsTable", items?.data || items);
 
-      const orgs = await fetchTopOrganizations(5);
+      const orgs = await fetchTopOrganizations(10);
       renderTable("orgsTable", orgs?.data || orgs);
 
       const views = await fetchTutorialViews(start, end);
