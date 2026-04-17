@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const { start, end } = getCurrentYearRange();
 
-      const tutorials = await fetchTopTutorials(5);
+      const tutorials = await fetchTopTutorials(10);
       renderTable("tutorialsTable", tutorials?.data || tutorials);
 
       const items = await fetchTopItems(5);
@@ -151,7 +151,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatMonth(dateStr) {
-    const date = new Date(dateStr);
+    const [year, month, day] = dateStr.split("-");
+
+    const date = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    );
+
     return date.toLocaleString("default", {
       month: "short",
       year: "numeric"
