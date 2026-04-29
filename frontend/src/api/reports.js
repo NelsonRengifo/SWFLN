@@ -94,5 +94,7 @@ export async function deleteFiles(fileIds) {
 // FREE ITEMS
 // =================================
 export async function fetchFreeItems() {
-  return apiFetch("/admin/items/free");
+  return apiFetch("/admin/items/free", {
+    method: "GET"
+  });
 }

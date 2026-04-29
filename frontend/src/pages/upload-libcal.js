@@ -56,6 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const headers = Object.keys(data[0]);
 
+    function formatHeader(header) {
+      return header
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
     if (!tableContainer) {
       console.error("filesTable container not found in DOM");
     }
@@ -65,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <thead>
           <tr>
             <th>Select</th>
-            ${headers.map(h => `<th>${h}</th>`).join("")}
+            ${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}
           </tr>
         </thead>
         <tbody>

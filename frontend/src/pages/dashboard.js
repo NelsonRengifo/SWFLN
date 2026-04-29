@@ -60,10 +60,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = Object.keys(data[0]);
 
+    function formatHeader(header) {
+      return header
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
     container.innerHTML = `
       <table>
         <thead>
-          <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+          <tr>${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}</tr>
         </thead>
         <tbody>
           ${data.map(row => `
