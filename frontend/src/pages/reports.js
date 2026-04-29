@@ -4,7 +4,8 @@ import {
   fetchTutorialViews,
   fetchTotalEvents,
   fetchTopItems,
-  fetchTopOrganizations
+  fetchTopOrganizations,
+  fetchFreeItems
 } from "../api/reports.js";
 import { showToast } from "../utils/toast.js";
 import { loadSidebar } from "../components/sidebar.js";
@@ -25,6 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
       activeTab = tab.dataset.type;
+
+      const startInput = document.getElementById("startDate");
+      const endInput = document.getElementById("endDate");
+
+      if (activeTab === "free-items") {
+        startInput.disabled = true;
+        endInput.disabled = true;
+      } else {
+        startInput.disabled = false;
+        endInput.disabled = false;
+      }
     });
   });
 
@@ -75,6 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTable(data?.data || data);
         break;
 
+      case "free-items":
+        setSectionTitle("Free Items (Cost = $0)");
+        data = await fetchFreeItems();
+        renderTable(data?.data || data);
+        break;
+
         default:
           reportContent.innerHTML = "<p>Invalid report type</p>";
       }
@@ -93,11 +111,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = Object.keys(data[0]);
 
+    function formatHeader(header) {
+      return header
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
     reportContent.innerHTML = `
       <table>
         <thead>
           <tr>
-            ${headers.map(h => `<th>${h}</th>`).join("")}
+            ${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}
           </tr>
         </thead>
         <tbody>
@@ -174,7 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatMonth(dateStr) {
-    const date = new Date(dateStr);
+    const [year, month] = dateStr.split("-");
+    const date = new Date(Number(year), Number(month) - 1);
     return date.toLocaleString("default", {
       month: "short",
       year: "numeric"
