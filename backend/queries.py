@@ -26,6 +26,7 @@ from backend.models.events import Events
 from backend.models.uploaded_files import UploadedFiles
 from backend.models.loans import Loans
 from backend.models.items import Items
+from backend.models.users import Users
 
 
 # ======================================================
@@ -295,6 +296,23 @@ def get_all_free_items(db) -> list[dict]:
 
     sql = load_sql("get_all_free_items", "admin")
     return db.execute(text(sql)).mappings().all()
+
+
+def event_roster(db) -> list[dict]:
+
+    sql = load_sql("event_roster", "admin")
+    return db.execute(text(sql)).mappings().all()
+
+
+def get_all_users(db) -> list[dict]:
+
+    sql = load_sql("get_all_users", "admin")
+    return db.execute(text(sql)).mappings().all()
+
+def delete_users(db, users) -> None:
+
+    delete_obj = delete(Users).where(Users.user_id.in_(users))
+    db.execute(delete_obj)
 
 # ======================================================
 # WORKER FUNCTIONS
