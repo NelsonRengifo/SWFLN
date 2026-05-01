@@ -36,6 +36,8 @@ from backend.schemas import TotalEvents
 from backend.schemas import TopCheckedOutItems
 from backend.schemas import TopOrganizations
 from backend.schemas import FreeItems
+from backend.schemas import EventRoster
+from backend.schemas import Users
 import backend.models
 
 
@@ -401,6 +403,15 @@ def delete_files(db, files: list[UUID]) -> None:
     for file_path in storage_paths:
         _delete_file_from_storage(file_path)
 
+
+# ======================================================
+# DELETE USERS LOGIC
+# ======================================================
+
+
+def delete_users(db, users: list[UUID]) -> None:
+
+    queries.delete_users(db, users)
 
 # ======================================================
 # DELETE ORPHAN TUTORIALS
@@ -846,6 +857,7 @@ def run_libcal_transform_logic(db, source):
                 last_name = None
                 registrant_name = None
                 organization = None
+                county = None
                 tag = None
                 event_title = None
                 event_type = None
@@ -992,10 +1004,16 @@ def run_libcal_transform_logic(db, source):
                             except:
                                 break
 
-                # check row is valid for insertion
+                    elif keyword == "county":
 
-                if not attended:
-                    continue
+                        if value:
+
+                            county = value.lower().strip()
+                        
+                        else:
+                            county = "N/A"
+
+                # check row is valid for insertion
 
                 if not first_name:
                     continue
@@ -1034,7 +1052,9 @@ def run_libcal_transform_logic(db, source):
                     "start_time": start_time,
                     "end_time": end_time,
                     "registrant_name": registrant_name,
+                    "attended": attended,
                     "organization": organization,
+                    "county": county,
                     "tag": tag,
                     "event_title": event_title,
                     "event_type": event_type,
@@ -1451,6 +1471,9 @@ def _classify_libcal(header: str) -> str | None:
     
     elif "confirmed" in h and "attend" in h:
         return "confirmed attendance"
+    
+    elif "county" in h:
+        return "county"
 
     return None
 
@@ -1636,6 +1659,30 @@ def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
     data = queries.get_most_checkedout_items(db, start_date, end_date, limit)
 
     return TopCheckedOutItems(data=data)
+
+
+# ======================================================
+# CONTAINS METADA ABOUT PARTICIPANTS PER EVENT
+# ======================================================
+
+
+def roster(db) -> EventRoster:
+
+    data = queries.event_roster(db)
+
+    return EventRoster(data=data)
+
+
+# ======================================================
+# INFO OF ALL STAFF USERS
+# ======================================================
+
+
+def users(db) -> Users:
+
+    data = queries.get_all_users(db)
+
+    return Users(data=data)
 
 
 # ======================================================
