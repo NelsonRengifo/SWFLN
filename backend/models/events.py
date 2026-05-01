@@ -7,7 +7,7 @@
 # ======================================================
 
 
-from sqlalchemy import Column, TEXT, INTEGER, ForeignKey, DATE, TIME, text
+from sqlalchemy import Column, TEXT, INTEGER, ForeignKey, DATE, TIME, BOOLEAN, text
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -31,7 +31,9 @@ class Events(Base):
     start_time                  = Column(TIME, nullable=False)
     end_time                    = Column(TIME, nullable=False)
     registrant_name             = Column(TEXT, nullable=False)
+    attended                    = Column(BOOLEAN, server_default=text("FALSE"))                
     organization                = Column(TEXT, nullable=True)
+    county                      = Column(TEXT, nullable=False, server_default=text("N/A"))
     tag                         = Column(TEXT, nullable=False)
     event_title                 = Column(TEXT, nullable=False)
     event_type                  = Column(TEXT, nullable=False)

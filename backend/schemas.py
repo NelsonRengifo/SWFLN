@@ -150,6 +150,12 @@ class TutorialViews(BaseModel):
 class DeleteFilesRequest(BaseModel):
     files: list[UUID]
 
+# ======================================================
+# DELETE USER(S) ROUTE CONTRACT
+# ======================================================
+
+class DeleteUsersRequest(BaseModel):
+    users: list[UUID]
 
 # ======================================================
 # TOTAL EVENTS BY TYPE 
@@ -185,3 +191,19 @@ class TopOrganizations(BaseModel):
 class FreeItems(BaseModel):
     data: list[dict]
     total: int
+
+
+# ======================================================
+# INDIVIDUAL METADATA PER EVENT
+# ======================================================
+
+class EventRoster(BaseModel):
+    data: list[dict]
+
+
+# ======================================================
+# CONTAINS USER METADATA
+# ======================================================
+
+class Users(BaseModel):
+    data: list[dict]

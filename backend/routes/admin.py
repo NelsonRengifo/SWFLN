@@ -275,3 +275,55 @@ def get_free_items(db=Depends(get_db), token=Depends(session_token)):
 
     except auth.InvalidToken:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
+    
+
+# ======================================================
+# RETURNS METADA OF INDIVIDUALS PER EVENT (LIBCAL)
+# ======================================================
+
+@admin_route.get("/event/roster", status_code=200, response_model=schemas.EventRoster)
+def get_events_roster(db=Depends(get_db), token=Depends(session_token)):
+    
+    try:
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
+        return services.roster(db)
+
+    except auth.InvalidToken:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
+    
+
+# ======================================================
+# SHOWS ALL USERS
+# ======================================================
+
+@admin_route.get("/get/users", status_code=200, response_model=schemas.EventRoster)
+def get_events_roster(db=Depends(get_db), token=Depends(session_token)):
+    
+    try:
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
+        return services.users(db)
+
+    except auth.InvalidToken:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
+    
+
+# ======================================================
+# DELETES USERS
+# ======================================================
+
+@admin_route.delete("/delete/users", status_code=204)
+def delete(payload: schemas.DeleteUsersRequest, db=Depends(get_db), token=Depends(session_token)):
+
+    try:
+        session = services.authenticate_token(db, token)
+        services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
+        users = payload.users
+        services.delete_users(db, users)
+
+    except auth.InvalidToken:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
+    
+    except admin.FailedToDeleteTutorials:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete tutorial data")
