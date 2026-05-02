@@ -198,7 +198,10 @@ class FreeItems(BaseModel):
 # ======================================================
 
 class EventRoster(BaseModel):
-    data: list[dict]
+    data: list[dict]      
+    page:  int
+    limit: int
+    has_next: bool
 
 
 # ======================================================

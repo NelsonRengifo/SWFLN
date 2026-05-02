@@ -1666,11 +1666,18 @@ def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 # ======================================================
 
 
-def roster(db) -> EventRoster:
+def roster(db, page) -> EventRoster:
+    
+    ROW_LIMIT = 25
+    offset_value = (page - 1) * ROW_LIMIT
+    has_next = False
 
-    data = queries.event_roster(db)
+    data = queries.event_roster(db, offset_value)
 
-    return EventRoster(data=data)
+    if len(data) > 25:
+        has_next = True
+    
+    return EventRoster(data=data, page=page, limit=ROW_LIMIT, has_next=has_next)
 
 
 # ======================================================

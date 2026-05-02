@@ -298,10 +298,10 @@ def get_all_free_items(db) -> list[dict]:
     return db.execute(text(sql)).mappings().all()
 
 
-def event_roster(db) -> list[dict]:
+def event_roster(db, offset) -> list[dict]:
 
     sql = load_sql("event_roster", "admin")
-    return db.execute(text(sql)).mappings().all()
+    return db.execute(text(sql), {"OFFSET": offset}).mappings().all()
 
 
 def get_all_users(db) -> list[dict]:
