@@ -297,7 +297,7 @@ def get_events_roster(page: int, db=Depends(get_db), token=Depends(session_token
 # SHOWS ALL USERS
 # ======================================================
 
-@admin_route.get("/get/users", status_code=200, response_model=schemas.EventRoster)
+@admin_route.get("/get/users", status_code=200, response_model=schemas.Users)
 def get_events_roster(db=Depends(get_db), token=Depends(session_token)):
     
     try:
