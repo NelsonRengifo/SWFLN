@@ -107,3 +107,16 @@ export async function registerUser(payload) {
     body: JSON.stringify(payload)
   });
 }
+
+// GET ALL USERS (ADMIN)
+export async function fetchUsers() {
+  return apiFetch("/admin/get/users");
+}
+
+// DELETE USERS (ADMIN)
+export async function deleteUsers(userIds) {
+  return apiFetch("/admin/delete/users", {
+    method: "DELETE",
+    body: JSON.stringify({ users: userIds })
+  });
+}

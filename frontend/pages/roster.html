@@ -1,0 +1,80 @@
+<!--Roster Page-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="apple-touch-icon" sizes="180x180" href="/frontend/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/frontend/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/frontend/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/frontend/favicon/site.webmanifest">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Event Roster</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/frontend/styles/base.css" />
+  <link rel="stylesheet" href="/frontend/styles/forms.css" />
+</head>
+
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="app-content">
+
+    <main class="main-content">
+
+      <!-- PAGE TITLE -->
+      <h1 class="page-title">Event Roster</h1>
+
+      <!-- FILTER CARD -->
+      <section class="card filters-card" aria-label="Roster filters">
+
+        <div class="filters">
+
+          <label>
+            Month
+            <input type="month" id="monthFilter" />
+          </label>
+
+          <label>
+            Attendance
+            <select id="attendanceFilter">
+              <option value="">All</option>
+              <option value="attended">Attended</option>
+              <option value="not_attended">Not Attended</option>
+            </select>
+          </label>
+
+          <button id="applyFiltersBtn">Apply Filters</button>
+
+          <button id="resetFiltersBtn" type="button">Reset</button>
+
+        </div>
+
+      </section>
+
+      <!-- RESULTS -->
+      <section class="card table-card" aria-label="Event roster table">
+        <div class="table-wrapper">
+          <div id="rosterContent">
+            <p>Loading roster...</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+</div>
+
+<script type="module" src="/frontend/src/pages/roster.js"></script>
+
+</body>
+</html>
