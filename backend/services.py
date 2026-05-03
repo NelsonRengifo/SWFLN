@@ -8,6 +8,7 @@ import hashlib
 import logging
 import io
 import csv
+import math
 from datetime import time, date
 from datetime import datetime, timezone, timedelta
 from typing import Literal
@@ -1614,6 +1615,7 @@ def file_data_dto(db, source, page) -> FileListResponse:
     offset_value = (page - 1) * ROW_LIMIT
     rows = queries.get_file_data(db, offset_value, source)
     has_next = False
+    total_pages = math.ceil(len(rows) / ROW_LIMIT)
 
     data = []
     counter = 0
@@ -1636,7 +1638,7 @@ def file_data_dto(db, source, page) -> FileListResponse:
 
         data.append(row_dict)
     
-    return FileListResponse(data=data, source=source ,page=page, limit=ROW_LIMIT, has_next=has_next)
+    return FileListResponse(data=data, source=source ,page=page, limit=ROW_LIMIT, has_next=has_next, total_pages=total_pages)
         
 
 # ======================================================
@@ -1676,8 +1678,10 @@ def roster(db, page) -> EventRoster:
 
     if len(data) > 25:
         has_next = True
+
+    total_pages = math.ceil(len(data) / ROW_LIMIT)
     
-    return EventRoster(data=data, page=page, limit=ROW_LIMIT, has_next=has_next)
+    return EventRoster(data=data, page=page, limit=ROW_LIMIT, has_next=has_next, total_pages=total_pages)
 
 
 # ======================================================
