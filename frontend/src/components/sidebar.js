@@ -15,7 +15,8 @@ export function loadSidebar() {
         <div class="nav-links">
         <a href="dashboard.html" class="${isActive("dashboard")}">Dashboard</a>
         <a href="reports.html" class="${isActive("reports")}">Reports</a>
-        <a href="settings.html" class="${isActive("settings")}">Settings</a>
+        <a href="roster.html" class="${isActive("roster")}">Rosters</a>
+        <a href="account.html" class="${isActive("account")}">Accounts</a>
         <a href="register.html" class="${isActive("register")}">Register</a>
 
         <div class="dropdown">

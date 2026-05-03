@@ -1,4 +1,4 @@
-<!--Settings Page-->
+<!--Accounts Page-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,12 +7,12 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/frontend/favicon/favicon-16x16.png">
   <link rel="manifest" href="/frontend/favicon/site.webmanifest">
   <meta charset="UTF-8" />
-  <title>Settings</title>
+  <title>Accounts</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/forms.css" />
-  <script type="module" src="/frontend/src/pages/settings.js" defer></script>
+  <script type="module" src="/frontend/src/pages/account.js" defer></script>
 </head>
 
 <body>
@@ -25,7 +25,7 @@
 
     <main class="main-content">
 
-      <h1 class="page-title">Settings</h1>
+      <h1 class="page-title">Account Settings</h1>
 
       <div class="settings-grid">
 
@@ -66,6 +66,21 @@
           </div>
 
           <button id="updateUsernameBtn">Update Username</button>
+        </section>
+
+        <!-- USERS MANAGEMENT -->
+        <section class="card">
+          <h2>Manage Users</h2>
+
+          <div class="table-wrapper">
+            <div id="usersTable">
+              <p>Loading users...</p>
+            </div>
+          </div>
+
+          <button id="deleteSelectedUsersBtn" style="margin-top:10px;">
+            Delete Selected Users
+          </button>
         </section>
 
       </div>

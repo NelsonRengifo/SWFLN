@@ -1,8 +1,5 @@
 import { apiFetch } from "./fetch.js";
 
-// =================================
-// HELPER: build query string safely
-// =================================
 function buildQuery(params) {
   const query = new URLSearchParams();
 
@@ -97,4 +94,16 @@ export async function fetchFreeItems() {
   return apiFetch("/admin/items/free", {
     method: "GET"
   });
+}
+
+// =================================
+// EVENT ROSTER
+// =================================
+export async function fetchEventRoster(page = 1, filters = {}) {
+  const query = new URLSearchParams({
+    page,
+    ...filters
+  });
+
+  return apiFetch(`/admin/event/roster?${query}`);
 }

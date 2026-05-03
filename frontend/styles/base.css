@@ -87,6 +87,7 @@ body {
 ================================ */
 .dropdown {
   position: relative;
+  display: inline-block;
 }
 
 .dropbtn {
@@ -98,9 +99,11 @@ body {
 .dropdown-content {
   display: none;
   position: absolute;
-  top: 36px;
+  top: 100%;
+  left: 0;
   background: white;
   min-width: 160px;
+  z-index: 1000;
   border-radius: 10px;
   border: 1px solid var(--border);
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
@@ -113,7 +116,7 @@ body {
 }
 
 .dropdown-content a:hover {
-  background: var(--bg);
+  color: var(--primary);
 }
 
 .dropdown:hover .dropdown-content {
