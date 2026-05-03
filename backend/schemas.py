@@ -130,6 +130,7 @@ class FileListResponse(BaseModel):
     page:  int
     limit: int
     has_next: bool
+    total_pages: int
 
 
 # ======================================================
@@ -202,6 +203,7 @@ class EventRoster(BaseModel):
     page:  int
     limit: int
     has_next: bool
+    total_pages: int
 
 
 # ======================================================
