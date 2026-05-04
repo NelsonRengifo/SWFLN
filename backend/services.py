@@ -137,9 +137,9 @@ def extend_session_expiration(db, expires_at ,user_id, token_hash) -> None:
     LIMIT = timedelta(hours=2) # 2 hours or less till session expires
 
     if expires_at - datetime.now(timezone.utc) <= LIMIT:
-        logger.debug("---EXTENDING SESSION---")
+        # logger.debug("---EXTENDING SESSION---")
         queries.extend_session_expiry(db, user_id, token_hash)
-    logger.debug("--NOTHING TO EXTEND---")
+    # logger.debug("--NOTHING TO EXTEND---")
 
 
 # ======================================================
@@ -643,7 +643,7 @@ def run_myturn_ingestion_logic(db, source) -> None:
 
             file_type = _classify_file(file_reader)
 
-            logger.debug(file_type)
+            # logger.debug(file_type)
 
             if file_type not in ["loans", "items"]:
                 raise admin.InvalidFileType("file is not a valid myturn file")
@@ -795,7 +795,7 @@ def run_niche_transform_logic(db, source) -> None:
                     "uploaded_file_id": file_id
                 })
 
-                logger.debug(tutorial_metrics)
+                # logger.debug(tutorial_metrics)
 
             # batch insert tutorial_metric
             if tutorial_metrics:
@@ -1673,13 +1673,20 @@ def roster(db, page) -> EventRoster:
     ROW_LIMIT = 25
     offset_value = (page - 1) * ROW_LIMIT
     has_next = False
+    total_pages = 0
 
-    data = queries.event_roster(db, offset_value)
+    start_date = datetime.now().date().replace(month=1, day=1)
+    end_date = datetime.now().date().replace(month=12, day=31)
 
+    data = queries.event_roster(db, offset_value, start_date, end_date)
+
+    roster_count = queries.get_roster_count(db, start_date, end_date)
+    
     if len(data) > 25:
         has_next = True
 
-    total_pages = math.ceil(len(data) / ROW_LIMIT)
+    if roster_count:
+        total_pages = math.ceil(roster_count / ROW_LIMIT)
     
     return EventRoster(data=data, page=page, limit=ROW_LIMIT, has_next=has_next, total_pages=total_pages)
 
