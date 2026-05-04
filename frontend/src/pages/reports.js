@@ -22,52 +22,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let activeTab = "tutorials";
 
+  // FLATPICKR INIT
+  const startPicker = flatpickr("#startMonth", {
+    dateFormat: "Y-m",
+    altInput: true,
+    altFormat: "F Y",
+    allowInput: false,
+    plugins: [new monthSelectPlugin({ shorthand: true })]
+  });
+
+  const endPicker = flatpickr("#endMonth", {
+    dateFormat: "Y-m",
+    altInput: true,
+    altFormat: "F Y",
+    allowInput: false,
+    plugins: [new monthSelectPlugin({ shorthand: true })]
+  });
+
+  startPicker.input.placeholder = "Select start month";
+  endPicker.input.placeholder = "Select end month";
+
   // TAB SWITCHING
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
+
       activeTab = tab.dataset.type;
 
-      // Hide date filters for free items
       if (dateFilters) {
         dateFilters.style.display =
           activeTab === "free-items" ? "none" : "flex";
       }
+
+      loadReport();
     });
   });
 
   // LOAD REPORT
-  if (loadBtn) {
-    loadBtn.addEventListener("click", loadReport);
-  }
+  loadBtn?.addEventListener("click", loadReport);
 
   async function loadReport() {
     const limit = parseInt(document.getElementById("limit")?.value) || 10;
 
-    const startMonth = document.getElementById("startMonth")?.value;
-    const endMonth = document.getElementById("endMonth")?.value;
+    const formatMonth = (picker) => {
+      if (!picker.selectedDates.length) return null;
 
-    const formatMonthToDate = (month) =>
-      month ? `${month}-01` : null;
+      const date = picker.selectedDates[0];
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
 
-    const startDate = formatMonthToDate(startMonth);
-    const endDate = formatMonthToDate(endMonth);
+      return `${year}-${month}-01`;
+    };
+
+    const startDate = formatMonth(startPicker);
+    const endDate = formatMonth(endPicker);
 
     reportContent.innerHTML = "<p>Loading...</p>";
-
-    const setSectionTitle = (title) => {
-      reportContent.innerHTML = `<h2 style="margin-bottom:10px;">${title}</h2>`;
-    };
 
     try {
       let data;
 
       switch (activeTab) {
         case "tutorials":
-          setSectionTitle("Top Tutorials");
           data = await fetchTopTutorials(limit, startDate, endDate);
-          renderTable(data?.data || data);
+          renderTable(data?.data || data, "Top Tutorials");
           break;
 
         case "views":
@@ -81,32 +100,29 @@ document.addEventListener("DOMContentLoaded", () => {
           break;
 
         case "items":
-          setSectionTitle("Top Items");
           data = await fetchTopItems(limit, startDate, endDate);
-          renderTable(data?.data || data);
+          renderTable(data?.data || data, "Top Items");
           break;
 
         case "orgs":
-          setSectionTitle("Top Organizations");
           data = await fetchTopOrganizations(limit, startDate, endDate);
-          renderTable(data?.data || data);
+          renderTable(data?.data || data, "Top Organizations");
           break;
 
         case "free-items":
-          setSectionTitle("Free Items (Cost = $0)");
           data = await fetchFreeItems();
 
-          const allRows = data?.data || data || [];
-          const limitedRows = allRows.slice(0, limit);
+          const rows = data?.data || [];
+          const limited = rows.slice(0, limit);
 
-          renderTable(limitedRows, {
-            total: allRows.length,
+          renderTable(limited, "Free Items (Cost = $0)", {
+            total: rows.length,
             showTotal: true
           });
           break;
 
         default:
-          reportContent.innerHTML = "<p>Invalid report type</p>";
+          reportContent.innerHTML = "<p>Invalid report</p>";
       }
 
     } catch (err) {
@@ -115,9 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // GENERIC TABLE
-  function renderTable(data, options = {}) {
-    if (!data || data.length === 0) {
+  // TABLE RENDER
+  function renderTable(data, title = "", options = {}) {
+    if (!data?.length) {
       reportContent.innerHTML = "<p>No data found</p>";
       return;
     }
@@ -126,10 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = Object.keys(data[0]).filter(h => h !== "user_id");
 
-    const formatHeader = (header) =>
-      header.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    const formatHeader = (h) =>
+      h.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
     reportContent.innerHTML = `
+      <h2 style="margin-bottom:10px;">${title}</h2>
+
       <table>
         <thead>
           <tr>
@@ -142,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
             </tr>
           `).join("")}
+
           ${showTotal && total !== null ? `
             <tr class="total-row">
               <td>Total</td>
@@ -153,10 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // EVENTS TABLE
-  function renderEventsTable(response) {
-    if (!response?.data?.length) {
-      reportContent.innerHTML = "<p>No data found</p>";
+  function renderEventsTable(res) {
+    if (!res?.data?.length) {
+      reportContent.innerHTML = "<p>No data</p>";
       return;
     }
 
@@ -169,25 +187,24 @@ document.addEventListener("DOMContentLoaded", () => {
           </tr>
         </thead>
         <tbody>
-          ${response.data.map(row => `
+          ${res.data.map(r => `
             <tr>
-              <td>${row.event_type}</td>
-              <td>${row.total}</td>
+              <td>${r.event_type}</td>
+              <td>${r.total}</td>
             </tr>
           `).join("")}
           <tr class="total-row">
             <td>TOTAL</td>
-            <td>${response.total}</td>
+            <td>${res.total}</td>
           </tr>
         </tbody>
       </table>
     `;
   }
 
-  // VIEWS TABLE
-  function renderViewsTable(response) {
-    if (!response?.data?.length) {
-      reportContent.innerHTML = "<p>No data found</p>";
+  function renderViewsTable(res) {
+    if (!res?.data?.length) {
+      reportContent.innerHTML = "<p>No data</p>";
       return;
     }
 
@@ -200,22 +217,22 @@ document.addEventListener("DOMContentLoaded", () => {
           </tr>
         </thead>
         <tbody>
-          ${response.data.map(row => `
+          ${res.data.map(r => `
             <tr>
-              <td>${formatMonth(row.date)}</td>
-              <td>${row.views}</td>
+              <td>${formatMonthDisplay(r.date)}</td>
+              <td>${r.views}</td>
             </tr>
           `).join("")}
           <tr class="total-row">
             <td>TOTAL</td>
-            <td>${response.total}</td>
+            <td>${res.total}</td>
           </tr>
         </tbody>
       </table>
     `;
   }
 
-  function formatMonth(dateStr) {
+  function formatMonthDisplay(dateStr) {
     const [year, month] = dateStr.split("-");
     const date = new Date(Number(year), Number(month) - 1);
     return date.toLocaleString("default", {

@@ -8,37 +8,55 @@ requireAuth();
 document.addEventListener("DOMContentLoaded", () => {
   loadSidebar();
 
+  // 1. Elements & State
   const rosterContent = document.getElementById("rosterContent");
+  const applyBtn = document.getElementById("applyFiltersBtn");
+  const resetBtn = document.getElementById("resetFiltersBtn");
+  const attendanceFilter = document.getElementById("attendanceFilter");
 
-  let filters = {
-    month: "",
-    attendance: ""
-  };
-
+  let filters = { startMonth: null, endMonth: null, attendance: "" };
   let currentPage = 1;
+  let totalPages = 1;
   let hasNext = false;
 
-  const applyBtn = document.getElementById("applyFiltersBtn");
-  if (applyBtn) {
-    applyBtn.onclick = () => {
-      filters.month = document.getElementById("monthFilter").value;
-      filters.attendance = document.getElementById("attendanceFilter").value;
-
-      currentPage = 1;
-      loadRoster();
-    };
-  }
-
-  document.getElementById("resetFiltersBtn").onclick = () => {
-    document.getElementById("monthFilter").value = "";
-    document.getElementById("attendanceFilter").value = "";
-
-    filters = { month: "", attendance: "" };
-    currentPage = 1;
-    loadRoster();
+  // 2. Helper: Format Date to YYYY-MM-01
+  const getFormattedMonth = (picker) => {
+    if (!picker || !picker.selectedDates.length) return null;
+    const d = picker.selectedDates[0];
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    return `${d.getFullYear()}-${month}-01`;
   };
 
+  // 3. Flatpickr Configuration
+  const fpConfig = {
+    dateFormat: "Y-m",
+    altInput: true,
+    altFormat: "F Y",
+    allowInput: false,
+    plugins: [new monthSelectPlugin({ shorthand: true })]
+  };
+
+  const startEl = document.getElementById("startMonth");
+  const endEl = document.getElementById("endMonth");
+
+  // NOTE: Ensure startEl and endEl are <input> tags in your HTML, not <select>
+  const startPicker = startEl ? flatpickr(startEl, {
+    ...fpConfig,
+    onReady: (sd, ds, instance) => {
+        if (instance.altInput) instance.altInput.placeholder = "Select start month";
+    }
+  }) : null;
+
+  const endPicker = endEl ? flatpickr(endEl, {
+    ...fpConfig,
+    onReady: (sd, ds, instance) => {
+        if (instance.altInput) instance.altInput.placeholder = "Select end month";
+    }
+  }) : null;
+
+  // 4. Load Roster Logic
   async function loadRoster() {
+    if (!rosterContent) return;
     rosterContent.innerHTML = "<p>Loading...</p>";
 
     try {
@@ -49,61 +67,68 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      hasNext = !!response.has_next;
+      hasNext = response.has_next;
+      totalPages = response.total_pages;
 
-      const data = response.data;
-      const headers = Object.keys(data[0]).filter(h => h !== "user_id");
-
-      function formatHeader(header) {
-        return header
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, c => c.toUpperCase());
-      }
+      // Extract headers excluding user_id
+      const headers = Object.keys(response.data[0]).filter(h => h !== "user_id");
+      const formatHeader = (h) => h.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
       rosterContent.innerHTML = `
         <table>
           <thead>
-            <tr>
-              ${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}
-            </tr>
+            <tr>${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}</tr>
           </thead>
           <tbody>
-            ${data.map(row => `
-              <tr>
-                ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
-              </tr>
+            ${response.data.map(row => `
+              <tr>${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}</tr>
             `).join("")}
           </tbody>
         </table>
 
         <div class="pagination" style="margin-top:15px; display:flex; gap:10px; align-items:center;">
           <button id="prevPage" ${currentPage === 1 ? "disabled" : ""}>Prev</button>
-          <span>
-            Page ${currentPage} ${hasNext ? "(More available)" : "(End)"}
-          </span>
+          <span>Page ${currentPage} of ${totalPages}</span>
           <button id="nextPage" ${!hasNext ? "disabled" : ""}>Next</button>
         </div>
       `;
 
-      document.getElementById("prevPage").onclick = () => {
-        if (currentPage > 1) {
-          currentPage--;
-          loadRoster();
-        }
-      };
+      // Pagination Listeners
+      const prevBtn = document.getElementById("prevPage");
+      const nextBtn = document.getElementById("nextPage");
 
-      document.getElementById("nextPage").onclick = () => {
-        if (hasNext) {
-          currentPage++;
-          loadRoster();
-        }
-      };
+      if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; loadRoster(); } };
+      if (nextBtn) nextBtn.onclick = () => { if (hasNext) { currentPage++; loadRoster(); } };
 
     } catch (err) {
-      console.error(err);
+      console.error("Roster Error:", err);
       showToast("Failed to load roster");
+      rosterContent.innerHTML = "<p>Error loading data.</p>";
     }
   }
 
+  // 5. Event Handlers
+  if (applyBtn) {
+    applyBtn.onclick = () => {
+      filters.startMonth = getFormattedMonth(startPicker);
+      filters.endMonth = getFormattedMonth(endPicker);
+      filters.attendance = attendanceFilter?.value || "";
+      currentPage = 1;
+      loadRoster();
+    };
+  }
+
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      startPicker?.clear();
+      endPicker?.clear();
+      if (attendanceFilter) attendanceFilter.value = "";
+      filters = { startMonth: null, endMonth: null, attendance: "" };
+      currentPage = 1;
+      loadRoster();
+    };
+  }
+
+  // Initial Load
   loadRoster();
 });
