@@ -67,8 +67,7 @@
 .settings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  max-width: 900px;
+  gap: 20px;
 }
 
 /* FORM GROUP */
