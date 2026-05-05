@@ -1668,7 +1668,7 @@ def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 # ======================================================
 
 
-def roster(db, page, start_date, end_date) -> EventRoster:
+def roster(db, page, start_date, end_date, attended) -> EventRoster:
     
     ROW_LIMIT = 25
     offset_value = (page - 1) * ROW_LIMIT
@@ -1686,9 +1686,9 @@ def roster(db, page, start_date, end_date) -> EventRoster:
     # logger.debug(end_date)
     # logger.debug("=====================")
         
-    data = queries.event_roster(db, offset_value, start_date, end_date)
+    data = queries.event_roster(db, offset_value, start_date, end_date, attended)
 
-    roster_count = queries.get_roster_count(db, start_date, end_date)
+    roster_count = queries.get_roster_count(db, start_date, end_date, attended)
     
     if len(data) > 25:
         has_next = True
