@@ -1668,16 +1668,24 @@ def get_top_items(db, start_date, end_date, limit) -> TopCheckedOutItems:
 # ======================================================
 
 
-def roster(db, page) -> EventRoster:
+def roster(db, page, start_date, end_date) -> EventRoster:
     
     ROW_LIMIT = 25
     offset_value = (page - 1) * ROW_LIMIT
     has_next = False
     total_pages = 0
 
-    start_date = datetime.now().date().replace(month=1, day=1)
-    end_date = datetime.now().date().replace(month=12, day=31)
+    if not start_date:
+        start_date = datetime.now().date().replace(month=1, day=1)
+    
+    if not end_date:
+        end_date = datetime.now().date().replace(month=12, day=31)
 
+    # logger.debug("=====================")
+    # logger.debug(start_date)
+    # logger.debug(end_date)
+    # logger.debug("=====================")
+        
     data = queries.event_roster(db, offset_value, start_date, end_date)
 
     roster_count = queries.get_roster_count(db, start_date, end_date)
