@@ -209,6 +209,9 @@ def top_organizations(limit: int = 5, start_date: date | None = None, end_date: 
 
     except auth.InvalidToken:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
+    
+    except admin.InvalidDateRange:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date range")
 
 
 
@@ -282,16 +285,21 @@ def get_free_items(db=Depends(get_db), token=Depends(session_token)):
 # ======================================================
 
 @admin_route.get("/event/roster", status_code=200, response_model=schemas.EventRoster)
-def get_events_roster(page: int, db=Depends(get_db), token=Depends(session_token)):
+def get_events_roster(page: int, start_date: date | None = None, end_date: date | None = None, db=Depends(get_db), token=Depends(session_token)):
     
     try:
         session = services.authenticate_token(db, token)
         services.extend_session_expiration(db, session.expires_at, session.user_id, session.token_hash)
-        return services.roster(db, page)
+        
+        if start_date and end_date:
+            services.is_valid_date_range(start_date, end_date)
+        return services.roster(db, page, start_date, end_date)
 
     except auth.InvalidToken:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or expired token")
     
+    except admin.InvalidDateRange:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date range")
 
 # ======================================================
 # SHOWS ALL USERS
