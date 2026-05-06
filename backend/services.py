@@ -1619,9 +1619,9 @@ def file_data_dto(db, source, page) -> FileListResponse:
 
     file_count = queries.get_file_count(db, source)
 
-    logger.debug("===========")
-    logger.debug(file_count)
-    logger.debug("===========")
+    # logger.debug("===========")
+    # logger.debug(file_count)
+    # logger.debug("===========")
 
     if file_count:
         total_pages = math.ceil(file_count / ROW_LIMIT)
