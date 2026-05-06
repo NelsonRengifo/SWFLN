@@ -1615,7 +1615,16 @@ def file_data_dto(db, source, page) -> FileListResponse:
     offset_value = (page - 1) * ROW_LIMIT
     rows = queries.get_file_data(db, offset_value, source)
     has_next = False
-    total_pages = math.ceil(len(rows) / ROW_LIMIT)
+    total_pages = 0
+
+    file_count = queries.get_file_count(db, source)
+
+    logger.debug("===========")
+    logger.debug(file_count)
+    logger.debug("===========")
+
+    if file_count:
+        total_pages = math.ceil(file_count / ROW_LIMIT)
 
     data = []
     counter = 0

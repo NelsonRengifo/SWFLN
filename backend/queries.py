@@ -248,6 +248,12 @@ def get_file_data(db, offset_value, source) -> list[Row]:
     return db.execute(text(sql), params).all()
 
 
+def get_file_count(db, source) -> int:
+
+    sql = load_sql("get_file_count", "admin")
+    return db.execute(text(sql), {"source": source}).scalar()
+
+
 def get_tutorial_views(db, start_date, end_date) -> list[dict]:
 
     params = {
