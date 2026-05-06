@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let filters = {
     start_date: null,
     end_date: null,
-    attendance: ""
+    attended: undefined // ✅ changed from attendance
   };
 
   let currentPage = 1;
@@ -133,7 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
     filters.start_date = getFormattedMonth(startPicker);
     filters.end_date = getFormattedMonth(endPicker);
 
-    filters.attended = attendanceFilter.value; 
+    // ✅ FIXED ATTENDANCE LOGIC
+    const val = attendanceFilter.value;
+
+    if (val === "attended") {
+      filters.attended = true;
+    } else if (val === "not_attended") {
+      filters.attended = false;
+    } else {
+      delete filters.attended; // 🔥 critical for "All"
+    }
 
     currentPage = 1;
     loadRoster();
@@ -151,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     filters = {
       start_date: null,
       end_date: null,
-      attendance: ""
+      attended: undefined
     };
 
     currentPage = 1;
