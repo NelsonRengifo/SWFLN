@@ -8,26 +8,33 @@ requireAuth();
 document.addEventListener("DOMContentLoaded", () => {
   loadSidebar();
 
-  // 1. Elements & State
+  // ELEMENTS
   const rosterContent = document.getElementById("rosterContent");
   const applyBtn = document.getElementById("applyFiltersBtn");
   const resetBtn = document.getElementById("resetFiltersBtn");
   const attendanceFilter = document.getElementById("attendanceFilter");
 
-  let filters = { startMonth: null, endMonth: null, attendance: "" };
+  // STATE
+  let filters = {
+    start_date: null,
+    end_date: null,
+    attendance: ""
+  };
+
   let currentPage = 1;
   let totalPages = 1;
   let hasNext = false;
 
-  // 2. Helper: Format Date to YYYY-MM-01
   const getFormattedMonth = (picker) => {
     if (!picker || !picker.selectedDates.length) return null;
+
     const d = picker.selectedDates[0];
     const month = String(d.getMonth() + 1).padStart(2, "0");
+
     return `${d.getFullYear()}-${month}-01`;
   };
 
-  // 3. Flatpickr Configuration
+  // FLATPICKR INIT
   const fpConfig = {
     dateFormat: "Y-m",
     altInput: true,
@@ -36,27 +43,28 @@ document.addEventListener("DOMContentLoaded", () => {
     plugins: [new monthSelectPlugin({ shorthand: true })]
   };
 
-  const startEl = document.getElementById("startMonth");
-  const endEl = document.getElementById("endMonth");
-
-  // NOTE: Ensure startEl and endEl are <input> tags in your HTML, not <select>
-  const startPicker = startEl ? flatpickr(startEl, {
+  const startPicker = flatpickr("#startMonth", {
     ...fpConfig,
-    onReady: (sd, ds, instance) => {
-        if (instance.altInput) instance.altInput.placeholder = "Select start month";
+    onReady: (_, __, instance) => {
+      if (instance.altInput) {
+        instance.altInput.placeholder = "Select start month";
+      }
     }
-  }) : null;
+  });
 
-  const endPicker = endEl ? flatpickr(endEl, {
+  const endPicker = flatpickr("#endMonth", {
     ...fpConfig,
-    onReady: (sd, ds, instance) => {
-        if (instance.altInput) instance.altInput.placeholder = "Select end month";
+    onReady: (_, __, instance) => {
+      if (instance.altInput) {
+        instance.altInput.placeholder = "Select end month";
+      }
     }
-  }) : null;
+  });
 
-  // 4. Load Roster Logic
+  // LOAD ROSTER
   async function loadRoster() {
     if (!rosterContent) return;
+
     rosterContent.innerHTML = "<p>Loading...</p>";
 
     try {
@@ -70,18 +78,23 @@ document.addEventListener("DOMContentLoaded", () => {
       hasNext = response.has_next;
       totalPages = response.total_pages;
 
-      // Extract headers excluding user_id
       const headers = Object.keys(response.data[0]).filter(h => h !== "user_id");
-      const formatHeader = (h) => h.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+      const formatHeader = (h) =>
+        h.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
       rosterContent.innerHTML = `
         <table>
           <thead>
-            <tr>${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}</tr>
+            <tr>
+              ${headers.map(h => `<th>${formatHeader(h)}</th>`).join("")}
+            </tr>
           </thead>
           <tbody>
             ${response.data.map(row => `
-              <tr>${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}</tr>
+              <tr>
+                ${headers.map(h => `<td>${row[h] ?? ""}</td>`).join("")}
+              </tr>
             `).join("")}
           </tbody>
         </table>
@@ -93,12 +106,20 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // Pagination Listeners
-      const prevBtn = document.getElementById("prevPage");
-      const nextBtn = document.getElementById("nextPage");
+      // Pagination
+      document.getElementById("prevPage").onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          loadRoster();
+        }
+      };
 
-      if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; loadRoster(); } };
-      if (nextBtn) nextBtn.onclick = () => { if (hasNext) { currentPage++; loadRoster(); } };
+      document.getElementById("nextPage").onclick = () => {
+        if (hasNext) {
+          currentPage++;
+          loadRoster();
+        }
+      };
 
     } catch (err) {
       console.error("Roster Error:", err);
@@ -107,28 +128,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 5. Event Handlers
-  if (applyBtn) {
-    applyBtn.onclick = () => {
-      filters.startMonth = getFormattedMonth(startPicker);
-      filters.endMonth = getFormattedMonth(endPicker);
-      filters.attendance = attendanceFilter?.value || "";
-      currentPage = 1;
-      loadRoster();
-    };
-  }
+  // APPLY FILTERS
+  applyBtn.onclick = () => {
+    filters.start_date = getFormattedMonth(startPicker);
+    filters.end_date = getFormattedMonth(endPicker);
 
-  if (resetBtn) {
-    resetBtn.onclick = () => {
-      startPicker?.clear();
-      endPicker?.clear();
-      if (attendanceFilter) attendanceFilter.value = "";
-      filters = { startMonth: null, endMonth: null, attendance: "" };
-      currentPage = 1;
-      loadRoster();
-    };
-  }
+    filters.attended = attendanceFilter.value; 
 
-  // Initial Load
+    currentPage = 1;
+    loadRoster();
+  };
+
+  // RESET FILTERS
+  resetBtn?.addEventListener("click", () => {
+    startPicker.clear();
+    endPicker.clear();
+
+    if (attendanceFilter) {
+      attendanceFilter.value = "";
+    }
+
+    filters = {
+      start_date: null,
+      end_date: null,
+      attendance: ""
+    };
+
+    currentPage = 1;
+    loadRoster();
+  });
+
+  // INITIAL LOAD
   loadRoster();
 });

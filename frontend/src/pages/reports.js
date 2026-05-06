@@ -74,9 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return `${year}-${month}-01`;
     };
+    const today = new Date();
 
-    const startDate = formatMonth(startPicker);
-    const endDate = formatMonth(endPicker);
+    const defaultStart = `${today.getFullYear()}-01-01`;
+    const defaultEnd = `${today.getFullYear()}-12-31`;
+
+    const startDate = formatMonth(startPicker) || defaultStart;
+    const endDate = formatMonth(endPicker) || defaultEnd;
 
     reportContent.innerHTML = "<p>Loading...</p>";
 

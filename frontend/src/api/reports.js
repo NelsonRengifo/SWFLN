@@ -30,13 +30,13 @@ export async function fetchTopTutorials(limit = 10, startDate = null, endDate = 
 // =================================
 // TUTORIAL VIEWS
 // =================================
-export async function fetchTutorialViews(startDate, endDate) {
-  const query = buildQuery({
-    start_date: startDate,
-    end_date: endDate
-  });
+export function fetchTutorialViews(start_date, end_date) {
+  const params = new URLSearchParams();
 
-  return apiFetch(`/admin/tutorials/views${query}`);
+  if (start_date) params.append("start_date", start_date);
+  if (end_date) params.append("end_date", end_date);
+
+  return apiFetch(`/admin/tutorials/views?${params.toString()}`);
 }
 
 
@@ -100,10 +100,16 @@ export async function fetchFreeItems() {
 // EVENT ROSTER
 // =================================
 export async function fetchEventRoster(page = 1, filters = {}) {
-  const query = new URLSearchParams({
-    page,
-    ...filters
-  });
+  const params = { page };
 
-  return apiFetch(`/admin/event/roster?${query}`);
+  if (filters.start_date) params.start_date = filters.start_date;
+  if (filters.end_date) params.end_date = filters.end_date;
+
+  if (filters.attended === "attended") {
+    params.attended = true;
+  } else if (filters.attended === "not_attended") {
+    params.attended = false;
+  }
+
+  return apiFetch(`/admin/event/roster?${new URLSearchParams(params)}`);
 }
