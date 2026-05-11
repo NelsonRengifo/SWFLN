@@ -20,6 +20,7 @@ export async function apiFetch(endpoint, options = {}) {
       ...options,
       headers
     });
+
   } catch (err) {
     showToast("Network error. Is backend running?");
     throw err;
@@ -52,13 +53,35 @@ export async function apiFetch(endpoint, options = {}) {
 
     try {
       const data = await res.json();
-      message = data.detail || message;
+
+      // FastAPI HTTPException detail
+      if (typeof data.detail === "string") {
+        message = data.detail;
+
+      // Validation errors
+      } else if (Array.isArray(data.detail)) {
+        message = data.detail
+          .map(err => err.msg)
+          .join(", ");
+
+      // Fallback generic message
+      } else if (data.message) {
+        message = data.message;
+      }
+
     } catch {
-      const text = await res.text();
-      message = text || message;
+      try {
+        const text = await res.text();
+        message = text || message;
+      } catch {
+        message = "Unknown server error";
+      }
     }
 
     console.error("API ERROR:", endpoint, message);
+
+    // SHOW BACKEND MESSAGE TO USER
+    showToast(message);
 
     throw new Error(message);
   }
@@ -66,7 +89,9 @@ export async function apiFetch(endpoint, options = {}) {
   // ===============================
   // 204 No Content
   // ===============================
-  if (res.status === 204) return null;
+  if (res.status === 204) {
+    return null;
+  }
 
   // ===============================
   // JSON safe parse

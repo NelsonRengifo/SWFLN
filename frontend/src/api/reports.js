@@ -105,10 +105,9 @@ export async function fetchEventRoster(page = 1, filters = {}) {
   if (filters.start_date) params.start_date = filters.start_date;
   if (filters.end_date) params.end_date = filters.end_date;
 
-  if (filters.attended === "attended") {
-    params.attended = true;
-  } else if (filters.attended === "not_attended") {
-    params.attended = false;
+  // ✅ already boolean or undefined — just pass it if it exists
+  if (filters.attended !== undefined) {
+    params.attended = filters.attended;
   }
 
   return apiFetch(`/admin/event/roster?${new URLSearchParams(params)}`);
