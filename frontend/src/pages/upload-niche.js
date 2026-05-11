@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadFilesBtn = document.getElementById("loadFilesBtn");
   const deleteBtn = document.getElementById("deleteBtn");
   const tableContainer = document.getElementById("filesTable");
+  const dropZone = document.getElementById("dropZone");
 
   let currentFiles = [];
   let currentPage = 1;
@@ -21,6 +22,57 @@ document.addEventListener("DOMContentLoaded", () => {
   let hasNext = false;
 
   // UPLOAD
+    dropZone?.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  dropZone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+  });
+
+  dropZone?.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+  });
+
+  dropZone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    dropZone.classList.remove("dragover");
+
+    const files = e.dataTransfer.files;
+
+    if (!files.length) return;
+
+    const file = files[0];
+
+    // Validate CSV
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      showToast("Only CSV files are allowed");
+      return;
+    }
+
+    // Set dropped file into file input
+    fileInput.files = files;
+
+    // Update UI
+    dropZone.innerHTML = `
+      <p>${file.name}</p>
+      <span>Ready to upload</span>
+    `;
+  });
+
+  fileInput?.addEventListener("change", () => {
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    dropZone.innerHTML = `
+      <p>${file.name}</p>
+      <span>Ready to upload</span>
+    `;
+  });
+  
   uploadBtn?.addEventListener("click", async () => {
     const file = fileInput.files[0];
 
@@ -41,8 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error(err);
-      showToast("Upload failed");
-      statusMsg.textContent = "Upload failed";
+      showToast(err.message || "Upload failed");
+      statusMsg.textContent = err.message || "Upload failed";
     }
   });
 
@@ -64,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error(err);
-      showToast("Failed to load files");
+      showToast(err.message || "Failed to load files");
     }
   }
 
@@ -140,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       loadFiles(currentPage);
     } catch (err) {
       console.error(err);
-      showToast("Delete failed");
+      showToast(err.message || "Delete failed");
     }
   });
 });
