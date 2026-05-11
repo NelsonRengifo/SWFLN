@@ -63,7 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBtn?.addEventListener("click", loadReport);
 
   async function loadReport() {
-    const limit = parseInt(document.getElementById("limitInput")?.value) || 10;
+    const limitInput = document.getElementById("limitInput");
+    const limit = Math.max(0, parseInt(limitInput?.value) || 10);
 
     const formatMonth = (picker) => {
       if (!picker.selectedDates.length) return null;
