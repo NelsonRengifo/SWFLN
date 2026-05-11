@@ -1,15 +1,10 @@
 # Future Updates
 
-This document serves as a living list of potential enhancements, fixes, and features that developers can consider implementing after handing off the SWFLN system to the client. It allows for ongoing improvement ideas to be captured and prioritized.
+This document serves as a list of potential enhancements, fixes, and features.
 
 ## Planned Enhancements
 
-- [ ] Real-time data processing for live updates
-- [ ] Advanced analytics and data visualizations (charts, graphs)
-- [ ] Integration with external APIs (e.g., calendar systems, notification services)
-- [ ] Mobile-responsive design improvements for better usability on devices
-- [ ] API rate limiting and performance optimizations
-- [ ] Automated data backup and recovery features
+- [ ] Remove admin ability to create another user in the frontend (only Super Admin is allowed).
 
 ## Known Issues to Address
 
@@ -26,5 +21,3 @@ This document serves as a living list of potential enhancements, fixes, and feat
 ## Notes
 
 - Add any specific bugs, user feedback, or ideas here.
-- Prioritize based on client needs and technical feasibility.
-- Update this document as new ideas emerge.
