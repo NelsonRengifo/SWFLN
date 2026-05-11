@@ -1,89 +1,129 @@
 <!--Reports Page-->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <link rel="apple-touch-icon" sizes="180x180" href="/frontend/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/frontend/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/frontend/favicon/favicon-16x16.png">
   <link rel="manifest" href="/frontend/favicon/site.webmanifest">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Reports</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Flatpickr -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/frontend/styles/base.css" />
   <link rel="stylesheet" href="/frontend/styles/forms.css" />
 </head>
 
 <body>
 
-<div class="app-layout">
+  <div class="app-layout">
 
-  <!-- SIDEBAR -->
-  <div id="sidebar"></div>
+    <!-- NAVBAR -->
+    <div id="sidebar"></div>
 
-  <!-- MAIN CONTENT -->
-  <div class="app-content">
+    <!-- MAIN CONTENT -->
+    <div class="app-content">
 
-    <main class="main-content">
+      <main class="main-content">
 
-      <!-- PAGE TITLE -->
-      <h1 class="page-title">Reports</h1>
+        <!-- PAGE TITLE -->
+        <h1 class="page-title">Reports</h1>
 
-      <!-- TABS -->
-      <div class="tabs-container">
-        <div class="tabs">
-          <button class="tab active" data-type="tutorials">Top Tutorials</button>
-          <button class="tab" data-type="views">Tutorial Views</button>
-          <button class="tab" data-type="events">Event Counts</button>
-          <button class="tab" data-type="items">Top Items</button>
-          <button class="tab" data-type="orgs">Top Organizations</button>
-          <button class="tab" data-type="free-items">Free Items</button>
-        </div>
-      </div>
+        <!-- REPORT TABS -->
+        
 
-      <!-- FILTER CARD -->
-      <section class="card filters-card">
+        <!-- FILTER SECTION -->
+        <section class="report-filters-card">
 
-        <div id="dateFilters">
-          <label>
-            Limit
-            <input type="number" id="limit" value="10" />
-          </label>
+          <div class="tabs-container">
+            <div class="tabs">
+              <button class="tab active" data-type="tutorials">Top Tutorials</button>
+              <button class="tab" data-type="views">Tutorial Views</button>
+              <button class="tab" data-type="events">Event Counts</button>
+              <button class="tab" data-type="items">Top Items</button>
+              <button class="tab" data-type="orgs">Top Organizations</button>
+              <button class="tab" data-type="free-items">Free Items</button>
+            </div>
+          </div>
 
-          <label>
-            Start Month
-            <input type="month" id="startMonth" />
-          </label>
+          <div class="report-filters-grid">
 
-          <label>
-            End Month
-            <input type="month" id="endMonth" />
-          </label>
+            <div class="filter-group">
+              <input
+                type="number"
+                id="limitInput"
+                placeholder="Enter Limit"
+              />
+            </div>
 
-          <button id="loadReportBtn">Load Report</button>
-        </div>
+            <div class="filter-group">
+              <input
+                type="text"
+                id="startMonth"
+                placeholder="Select Start Month"
+              />
+            </div>
 
-      </section>
+            <div class="filter-group">
+              <input
+                type="text"
+                id="endMonth"
+                placeholder="Select End Month"
+              />
+            </div>
 
-      <!-- RESULTS -->
-      <section class="card table-card">
-        <div class="table-wrapper">
-          <div id="reportContent"></div>
-        </div>
-      </section>
+            <div class="report-filter-actions">
+              <button id="loadReportBtn">
+                Load Report
+              </button>
+            </div>
 
-    </main>
+          </div>
+
+        </section>
+
+        <!-- REPORT RESULTS -->
+        <section class="card table-card report-results">
+          <div class="table-wrapper">
+            <div id="reportContent">
+              <p>Select filters and load a report.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
 
   </div>
-  
-</div>
 
-<script type="module" src="/frontend/src/pages/reports.js"></script>
+  <script type="module" src="/frontend/src/pages/reports.js"></script>
 
 </body>
+
 </html>
