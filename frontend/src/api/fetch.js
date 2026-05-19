@@ -1,7 +1,7 @@
 import { getToken, clearToken } from "../utils/storage.js";
 import { showToast } from "../utils/toast.js";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://reporting-dashboard-pc2g.onrender.com";
 
 export async function apiFetch(endpoint, options = {}) {
   const token = getToken();
