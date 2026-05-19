@@ -41,7 +41,7 @@ export async function logout() {
     clearToken();
 
     setTimeout(() => {
-      window.location.href = "/frontend/pages/login.html";
+      window.location.href = "/pages/login.html";
     }, 800);
 
   }

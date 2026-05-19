@@ -38,7 +38,7 @@ export async function apiFetch(endpoint, options = {}) {
       showToast("Session expired. Please login again.");
 
       setTimeout(() => {
-        window.location.href = "/frontend/pages/login.html";
+        window.location.href = "/pages/login.html";
       }, 1200);
     }
 
