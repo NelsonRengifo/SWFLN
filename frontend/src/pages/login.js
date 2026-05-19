@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Redirect if already logged in
   if (getToken()) {
-    window.location.href = "/frontend/pages/dashboard.html";
+    window.location.href = "/pages/dashboard.html";
   }
   // =========================
   // LOGIN HANDLER
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await login(username, password);
 
-      window.location.href = "/frontend/pages/dashboard.html";
+      window.location.href = "/pages/dashboard.html";
 
     } catch (err) {
       errorMsg.textContent = err.message || "Login failed";

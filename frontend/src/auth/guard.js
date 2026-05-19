@@ -7,6 +7,6 @@ export function requireAuth() {
   // Only redirect if definitely not logged in
   if (!token && !isLoginPage) {
     console.warn("No token → redirecting to login");
-    window.location.replace("/frontend/pages/login.html");
+    window.location.replace("/pages/login.html");
   }
 }
